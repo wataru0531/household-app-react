@@ -105,21 +105,21 @@ const Sidebar: React.FC<SidebarProps> = ({
   return(
     <Box
       component="nav"
-      sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+      sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
       aria-label="mailbox folders"
     >
 
       {/* スマホ用のドロワー */}
       <Drawer
         variant="temporary" // temporary 固定ではなく、クリック後に表示させる
-        open={mobileOpen}
+        open={ mobileOpen }
         onTransitionEnd={handleDrawerTransitionEnd}
         onClose={handleDrawerClose}
         ModalProps={{
           keepMounted: true, // Better open performance on mobile.
         }}
         sx={{ // style属性
-          display: { xs: 'block', sm: 'none' }, // xs: 0px以上, sm: 600px以上
+          display: { xs: 'block', md: 'none' }, // xs: 0px以上, sm: 600px以上
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
         }}
       >
@@ -130,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Drawer
         variant="permanent" // 常に固定で表示される
         sx={{
-          display: { xs: 'none', sm: 'block' },
+          display: { xs: 'none', md: 'block' },
           '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
         }}
         open

@@ -16,7 +16,6 @@ import Sidebar from '../common/Sidebar';
 const drawerWidth = 240;
 
 
-
 export default function AppLayout() {
   // ドロワーのステート
   const [ mobileOpen, setMobileOpen ] = useState(false);
@@ -32,7 +31,7 @@ export default function AppLayout() {
   };
 
   const handleDrawerToggle = () => {
-    if (!isClosing) {
+    if (!isClosing) { // 
       setMobileOpen(!mobileOpen);
     }
   };
@@ -48,8 +47,8 @@ export default function AppLayout() {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          width: { md: `calc(100% - ${drawerWidth}px)` },
+          ml: { md: `${drawerWidth}px` },
         }}
       >
         <Toolbar>
@@ -57,13 +56,13 @@ export default function AppLayout() {
             color="inherit"
             aria-label="open drawer"
             edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
+            onClick={ handleDrawerToggle }
+            sx={{ mr: 2, display: { md: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Responsive drawer
+            Household Budgeting App
           </Typography>
         </Toolbar>
       </AppBar>
@@ -79,12 +78,12 @@ export default function AppLayout() {
       {/* mainコンテンツ */}
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+        sx={{ flexGrow: 1, p: 3, width: { md: `calc(100% - ${drawerWidth}px)` } }}
       >
         <Toolbar />
 
-          {/* Home, report, noMatchを呼び出す */}
-          <Outlet />
+        {/* Home, report, noMatchを呼び出す */}
+        <Outlet />
         
       </Box>
     </Box>
