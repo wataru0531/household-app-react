@@ -14,3 +14,10 @@ export interface Transaction {
   type: TransactionType // この2つのどちらかしかない
   category: IncomeType | ExpenseCategory
 }
+
+// 
+export interface Balance {
+  income: number
+  expense: number
+  balance: number
+}

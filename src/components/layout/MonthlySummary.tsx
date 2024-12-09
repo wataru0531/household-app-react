@@ -10,9 +10,20 @@ import Grid from "@mui/material/Grid2";
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import { Transaction } from "../../types";
+import { financeCalculations } from "../../utils/financeCalculations";
 
+interface MonthlySummaryProps {
+  monthlyTransactions: Transaction[]
+}
 
-const MonthlySummary: React.FC = () => {
+const MonthlySummary: React.FC<MonthlySummaryProps> = ({ monthlyTransactions }) => {
+  // console.log(monthlyTransactions); // 2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', date: '2024-12-09', content: '銀行振込', amount: '2000', …}, {…}]
+
+  // 収入、支出、残高を算出
+  const { income, expense, balance } = financeCalculations(monthlyTransactions);
+  // console.log({ income, expense, balance });
+
   return(
     <Grid container mb={2} spacing={{ xs: 1, sm: 2 }}>
 
