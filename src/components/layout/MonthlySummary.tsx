@@ -13,14 +13,15 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { Transaction } from "../../types";
 import { financeCalculations } from "../../utils/financeCalculations";
 
+// 今月のデータ
 interface MonthlySummaryProps {
   monthlyTransactions: Transaction[]
 }
 
 const MonthlySummary: React.FC<MonthlySummaryProps> = ({ monthlyTransactions }) => {
-  // console.log(monthlyTransactions); // 2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', date: '2024-12-09', content: '銀行振込', amount: '2000', …}, {…}]
+  // console.log(monthlyTransactions); // (2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', date: '2024-12-09', content: '銀行振込', amount: '2000', …}, {…}]
 
-  // 収入、支出、残高を算出
+  // その月のデータから、収入、支出、残高を算出
   const { income, expense, balance } = financeCalculations(monthlyTransactions);
   // console.log({ income, expense, balance });
 
@@ -46,7 +47,8 @@ const MonthlySummary: React.FC<MonthlySummaryProps> = ({ monthlyTransactions }) 
               variant="h5" 
               fontWeight={"fontWeightBold"}
               sx={{ wordBreak: "break-word", fontSize: { sx: ".8rem", sm: "1rem", md: "1.2rem" } }}
-            >￥300
+            >
+              ¥{ income }
             </Typography>
           </CardContent>
         </Card>
@@ -70,7 +72,8 @@ const MonthlySummary: React.FC<MonthlySummaryProps> = ({ monthlyTransactions }) 
               variant="h5" 
               fontWeight={"fontWeightBold"}
               sx={{ wordBreak: "break-word", fontSize: { sx: ".8rem", sm: "1rem", md: "1.2rem" } }}
-            >￥0
+            >
+              |{ expense }
             </Typography>
           </CardContent>
         </Card>
@@ -95,7 +98,8 @@ const MonthlySummary: React.FC<MonthlySummaryProps> = ({ monthlyTransactions }) 
               variant="h5" 
               fontWeight={"fontWeightBold"}
               sx={{ wordBreak: "break-word", fontSize: { sx: ".8rem", sm: "1rem", md: "1.2rem" } }}
-            >￥30000
+            >
+              ¥{ balance }
             </Typography>
           </CardContent>
         </Card>

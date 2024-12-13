@@ -11,16 +11,18 @@ import { Transaction } from "../types";
 
 interface HomeProps {
   monthlyTransactions: Transaction[] // オブジェクトの配列
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>
 }
 
-const Home: React.FC<HomeProps> = ({ monthlyTransactions }) => {
+const Home: React.FC<HomeProps> = ({ monthlyTransactions, setCurrentMonth }) => {
+  // console.log(setCurrentMonth)
 
   return (
     <Box sx={{ display: "flex" }}>
       {/* 左コンテンツ */}
       <Box sx={{ flexGrow: 1 }}>
         <MonthlySummary monthlyTransactions={ monthlyTransactions } />
-        <Calendar />
+        <Calendar monthlyTransactions={ monthlyTransactions } setCurrentMonth={ setCurrentMonth } />
       </Box>
 
       {/* 右コンテンツ */}

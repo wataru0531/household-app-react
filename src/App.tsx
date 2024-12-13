@@ -25,8 +25,6 @@ function App() {
   // console.log(currentMonth);
   // console.log(format(currentMonth, "yyyy-MM"));
 
-
-
   // 型ガード
   // is演算子
   // → 関数が特定の型を返すことを TypeScript に明示的に示すことができる
@@ -50,7 +48,6 @@ function App() {
         // console.log(querySnapshot); // QuerySnapshot {_firestore: Firestore, _userDataWriter: __PRIVATE_ExpUserDataWriter, _snapshot: ViewSnapshot, metadata: SnapshotMetadata, query: CollectionReference}
         
         // docs → FirebaseSDKのクラスで、getterとしいて定義されており、QueryDocumentSnapshotオブジェクトを返す
-        // data() → 同様にgetterでドキュメントを返すようになっている
         const transactionsData = querySnapshot.docs.map((doc) => {
           // console.log(doc); // QueryDocumentSnapshot {_firestore: Firestore, _userDataWriter: __PRIVATE_ExpUserDataWriter, _key: DocumentKey, _document: MutableDocument, _converter: null, …}
           // console.log(doc.data());
@@ -61,7 +58,7 @@ function App() {
             ...doc.data() // プロパティを展開
           } as Transaction; 
           // 型アサーション
-          // → ここでは、doc.id、...doc.data()から取得できる値をtypescriptが判定できないので、何の型が含まれているかを明示してやる
+          // → ここでは、doc.idや...doc.data()から取得できる値をtypescriptが判定できないので、何の型が含まれているかを明示してやる
         });
         // console.log(transactionsData); // (2) [{id: '6rblq1UPv564Xd32jdlB', content: '銀行振込', date: '2024-12-09', category: '給与', amount: '2000', …, {…}]
         
@@ -82,12 +79,16 @@ function App() {
     }
   }, []);
 
-  // 今月のデータのみ取得
+  // ひと月分(今月分)のデータのみ取得
+  // transactions または currentMonth の状態が変わるたびに、再評価される
+  // → 変更があれば再レンダリングされて、最新の monthlyTransactions が反映される
+  //   変更されたstateがあれば、依存しているコンポーネント(この場合は AppもHomeも)が再レンダリングされる
   const monthlyTransactions = transactions.filter((transaction) => {
     // console.log(transaction); // {id: '6rblq1UPv564Xd32jdlB', category: '給与', type: 'income', date: '2024-12-09', amount: '2000', …}
     // console.log( transaction.date.startsWith(format(currentMonth, "yyyy-MM")))
     
-    // 日付のフォーマットを変更
+    // 今月の月日に合致する月のデータのみstateに保持
+    // formatMonth → 日付のフォーマットを変更。例: 2024-12
     return transaction.date.startsWith(formatMonth(currentMonth));
   });
 
@@ -104,7 +105,7 @@ function App() {
 
               <Route path="/" element={ <AppLayout /> }>
                 {/* index → /にリクエストがあれば、Homeが呼ばれる */}
-                <Route index element={ <Home monthlyTransactions={ monthlyTransactions } /> }/>
+                <Route index element={ <Home monthlyTransactions={ monthlyTransactions } setCurrentMonth={ setCurrentMonth } /> }/>
 
                 <Route path="report" element={ <Report /> }/>
                 <Route path="*" element={ <NoMatch /> }/>
