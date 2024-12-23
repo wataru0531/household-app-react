@@ -67,7 +67,6 @@ function App() {
       // console.log(transactions); // 2) [{id: '6rblq1UPv564Xd32jdlB', amount: '2000', date: '2024-12-09', type: 'income', category: '給与' }, {…}]
 
       fetchTransactions();
-
     } catch(error) {
       if(isFireStoreError(error)){
         // Firestoreの環境によるエラー
@@ -105,7 +104,15 @@ function App() {
 
               <Route path="/" element={ <AppLayout /> }>
                 {/* index → /にリクエストがあれば、Homeが呼ばれる */}
-                <Route index element={ <Home monthlyTransactions={ monthlyTransactions } setCurrentMonth={ setCurrentMonth } /> }/>
+                <Route 
+                  index 
+                  element={ 
+                    <Home 
+                      monthlyTransactions={ monthlyTransactions } 
+                      setCurrentMonth={ setCurrentMonth } 
+                    />
+                  }
+                />
 
                 <Route path="report" element={ <Report /> }/>
                 <Route path="*" element={ <NoMatch /> }/>

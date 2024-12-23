@@ -1,12 +1,10 @@
 
 // 収入、支出、残高を計算する関数
 
-
-import { cl } from "@fullcalendar/core/internal-common";
 import { Transaction, Balance } from "../types";
 
 
-// Firestoreから取得したオブジェクトを元に、収入、支出、残高を返す関数
+// Firestoreから取得したオブジェクトを元に、収入、支出を計算して、残高を返す関数
 export function financeCalculations(_transactions: Transaction[]): Balance {
   // console.log(_transactions); 
   // [{id: '6rblq1UPv564Xd32jdlB', category: '給与', amount: '2000', date: '2024-12-09', type: 'income', …}, {…}, {…}]
@@ -15,6 +13,7 @@ export function financeCalculations(_transactions: Transaction[]): Balance {
 
   // 合計値が返す
   // accu ... 累積値。accumulation
+  // curr ... 配列の要素が入ってくる
   return _transactions.reduce((accu, curr) => {
     // console.log(accu); // {income: 0, expense: 0, balance: 0}
     // 初期値。これにcurrである、_transactionオブジェクトのincome、expenseをそれぞれ分けてプラスしていく
@@ -43,6 +42,7 @@ export function calculateDailyBalances(_transactions: Transaction[]): Record<str
   // string → 日付(2024-12-02)の型
   // Balance →  { income: 300, expense: 200, balance: 100 } の型
 
+  // console.log(_transactions);
   // Record<string, Balance> → 初期値の{}に対しての型定義。初期値の{}に何が入るのかtypescriptが理解できていない
   return _transactions.reduce<Record<string, Balance>>((accu, curr) => { 
     // (2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', date: '2024-12-09', content: '銀行振込', amount: '2000', …}, {…}]
@@ -50,21 +50,25 @@ export function calculateDailyBalances(_transactions: Transaction[]): Record<str
     // console.log(curr); // _transactionが1つづつ渡ってくる
 
     const day = curr.date;
-    if(accu[day]) { return accu }; // すでに格納ずみのオブジェクトがあれば早期リターンでスキップ
+    // if(accu[day]) { return accu }; // すでに格納ずみのオブジェクトがあれば早期リターンでスキップ
 
     if(!accu[day]){ // オブジェクトにそのdateがない場合のみ追加
+      // console.log(day)
       accu[day] = { income: 0, expense: 0, balance: 0 }
+      // console.log(accu); // { 2024-12-09: {income: 2000, expense: 7200, balance: 0}}
+      // console.log(accu[day]); // {income: 0, expense: 0, balance: 0}
     }
 
-    if(curr.type = "income"){
+    if(curr.type === "income"){
       accu[day].income += curr.amount;
     } else {
+      // console.log(curr.amount)
       accu[day].expense += curr.amount;
     }
   
-    accu[day].balance = accu[day].income - accu[day].expense;
+    // accu[day].balance = accu[day].income - accu[day].expense;
 
-    // console.log(accu); // {2024-12-09: 2024-12-03: { income: 500, expense: 0, balance: 500}, 2024-12-03: {…}, 2024-12-07: {…} }
+    // console.log(accu); // { 2024-12-09: {income: 2000, expense: 7200, balance: 0}, 2024-12-03: {…}, 2024-12-07: {…} }
     return accu;
   }, {}); // この初期値のオブジェクトにincome, expense, balanceを追加
 }

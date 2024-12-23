@@ -1,7 +1,7 @@
 
 
 // MonthlySummary (Home)
-// 収入、支出、残高
+// 収入(青)、支出(赤)、残高(緑)
 
 import { Card, CardContent, Stack, Typography } from "@mui/material";
 // Gridからのimportだとエラーがでる。
