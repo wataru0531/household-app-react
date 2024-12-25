@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import {  BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { collection, getDocs } from 'firebase/firestore';
+import { addDoc, collection, getDocs } from 'firebase/firestore';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { format } from "date-fns";
 
 import Home from './pages/Home';
 import Report from './pages/Report';
@@ -15,6 +14,8 @@ import { theme } from './theme/theme'; // フォントなど
 import { Transaction } from './types';
 import { db } from './firebase';
 import { formatMonth } from './utils/formatting';
+import { Schema } from './validations/schema';
+
 
 function App() {
   // console.log(Home);
@@ -25,6 +26,7 @@ function App() {
   // console.log(currentMonth);
   // console.log(format(currentMonth, "yyyy-MM"));
 
+  // FireStoreでのエラーなのか、一般的なエラーなのかを分ける関数
   // 型ガード
   // is演算子
   // → 関数が特定の型を返すことを TypeScript に明示的に示すことができる
@@ -37,6 +39,7 @@ function App() {
     return typeof error === "object" && error !== null && "code" in error;
   }
 
+  // FireStoreからデータを取得 → ステートに保持
   useEffect(() => {
     try{
       const fetchTransactions = async() => {
@@ -91,6 +94,34 @@ function App() {
     return transaction.date.startsWith(formatMonth(currentMonth));
   });
 
+  // FireStoreにデータを保存
+  const handleSaveTransition = async (_transaction: Schema) => {
+
+    try{
+      const docRef = await addDoc(collection(db, "Transactions"), _transaction );
+      // console.log("Document written with ID: ", docRef.id);
+
+      const newTransaction = {
+        id: docRef.id,
+        ..._transaction
+      } as Transaction;
+      // console.log(newTransaction); // {id: 'YCr1IV0lNZOnfXU5r4WQ', type: 'expense', date: '2024-12-23', amount: 40000, content: '家賃', …}
+
+      // もともとのtransactionにFireStoreに保存するデータを追加する
+      setTransactions(prevTransaction => [
+        ...prevTransaction, // 前のステート
+        newTransaction      // 新しいステート
+      ]);
+
+    } catch(error){
+      if(isFireStoreError(error)){
+        console.log("FireStoreのエラーは: ", error);
+      } else {
+        console.log("一般的なエラーは: ", error);
+      }
+    }
+  }
+
   // console.log(monthlyTransactions); // 2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', content: '銀行振込', amount: '2000', date: '2024-12-09', …}}, {…}]
 
   return (
@@ -109,7 +140,8 @@ function App() {
                   element={ 
                     <Home 
                       monthlyTransactions={ monthlyTransactions } 
-                      setCurrentMonth={ setCurrentMonth } 
+                      setCurrentMonth={ setCurrentMonth }
+                      handleSaveTransition={ handleSaveTransition }
                     />
                   }
                 />

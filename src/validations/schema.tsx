@@ -1,7 +1,7 @@
 
 // zodを使ったスキーマ
 
-import {  z } from "zod";
+import { z } from "zod";
 
 export const transactionSchema = z.object({
   type: z.enum(["income", "expense"]), // enum ... enumeration。列挙という意味
@@ -17,7 +17,8 @@ export const transactionSchema = z.object({
     z.enum(["給与", "副収入", "お小遣い"]), // 収入
     z.literal(""), // から文字のみ許容しておく。エラーメッセージを出すため
     // ここでは1つの配列でいいが、支出と収入とでわかりやすいように2つの配列に分ける
-  ]).refine((val) => val !== "", {
+  ])
+  .refine((val) => val !== "", {
     // 値が空文字ならエラーメッセージを出す
     message: "カテゴリを選択してください",
   }),

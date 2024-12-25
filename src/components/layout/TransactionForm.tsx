@@ -26,15 +26,17 @@ import WorkIcon from "@mui/icons-material/Work";
 import SavingsIcon from "@mui/icons-material/Savings";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 
-import { Controller, useForm } from "react-hook-form";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { ExpenseCategoryType, IncomeCategoryType } from "../../types";
-import { transactionSchema } from "../../validations/schema";
+import { transactionSchema, Schema } from "../../validations/schema";
 import { cl } from "@fullcalendar/core/internal-common";
+
 
 interface TransactionFormProps {
   isEntryDrawerOpen: boolean
   onCloseForm: () => void
   currentDay: string
+  handleSaveTransition: (_transaction: Schema) => Promise<void>
 }
 
 type IncomeExpenseType = "income" | "expense";
@@ -47,19 +49,19 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   isEntryDrawerOpen,
   onCloseForm,
   currentDay,
+  handleSaveTransition
 }) => {
   // console.log(currentDay);
   const formWidth = 320;
 
-  // control → React Hook Formが内部でフォームの状態(値、エラーメッセージなど)を管理するためのオブジェクト。
-  // setValue → controlが管理している特定のフィールドの値を更新する関数
+  // React-Hook-Formの初期化
   const { 
-    control, 
+    control, // RHFが内部でフォームの状態(値、エラーメッセージなど)を管理するためのオブジェクト
     handleSubmit,
     formState: { errors },
-    setValue, 
+    setValue, // controlが管理している特定のフィールドの値を更新する関数
     watch 
-  } = useForm({
+  } = useForm<Schema>({
     defaultValues: { // 初期値
       type: "expense",
       date: currentDay,
@@ -71,7 +73,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     // → React Hook Form(RHF)で外部のバリデーションライブラリ(例えばZodやYupなど)と連携するためのプロパティ。
     //   resolverを使用することで、RHFのフォームバリデーションをより柔軟に、外部ライブラリのバリデーション機能を統合して利用できる
   });
-  console.log(errors); // {content: {message: '内容は50文字以内にしてください', type: 'too_big', ref: {…}}}
+  // console.log(errors); // {content: {message: '内容は50文字以内にしてください', type: 'too_big', ref: {…}}}
+  // console.log(control); // {register: ƒ, unregister: ƒ, getFieldState: ƒ, handleSubmit: ƒ, setError: ƒ, …}
 
   // 収入、支出のボタンのvalueを切り替える
   const incomeExpenseToggle = (_type: IncomeExpenseType) => {
@@ -116,9 +119,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   }, [ currentType ]); // currentTypw → income、expense
 
   // 送信処理
-  const onSubmit = (data: any) => {
-    // console.log(data); // {type: 'expense', date: '2024-12-20', amount: 100, content: 'テスト', category: '食費'}
+  const onSubmit:SubmitHandler<Schema> = (data) => {
+    // console.log(data); 
+    // // { type: 'expense', date: '2024-12-23', amount: 200, content: 'テスト', category: '食費'}
+
+    handleSaveTransition(data); // FireStoreにデータを保存
   }
+
 
   return (
     <Box 
@@ -147,9 +154,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
         {/* 閉じるボタン */}
         <IconButton
           onClick={ onCloseForm }
-          sx={{
-            color: (theme) => theme.palette.grey[500],
-          }}
+          sx={{ color: (theme) => theme.palette.grey[500], }}
         >
           <CloseIcon />
         </IconButton>
@@ -192,7 +197,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                     color="error" // 赤
                   >支出
                   </Button>
-
                   <Button 
                     onClick={ () => incomeExpenseToggle("income") }
                     variant={ field.value === "income" ? "contained" : "outlined" }
@@ -211,6 +215,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
               // console.log(field); // {name: 'date', value: undefined, onChange: ƒ, onBlur: ƒ, ref: ƒ}
               
               return (
+                // TextField
+                // → 内部的に<input>または<textarea>を使用していて、タイプに応じて適切なHTML要素をレンダリング
                 <TextField
                   { ...field } // ここでデータを展開する
                   label="日付"
@@ -218,6 +224,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                   InputLabelProps={{
                     shrink: true,
                   }}
+                  // error={ true } // trueならエラーとなる
+                  // errors.dateならその文字列が入ってしまうので、booleanに変換
+                  error={ !!errors.date }
+                  helperText={ errors.date?.message } // エラーメッセージ
                 />
               )
             }}
@@ -232,7 +242,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 
             return (
               // fieldオブジェクトのvalueに、MenuItemで選んだvalueに格納される
-              <TextField { ...field } id="カテゴリ" label="カテゴリ" select>
+              <TextField 
+                { ...field } 
+                id="カテゴリ" 
+                label="カテゴリ" 
+                select
+                error={ !!errors.category }
+                helperText = { errors.category?.message }
+              >
                 {
                   categories.map(category => (
                     <MenuItem key={ category.label } value={ category.label }>
@@ -267,12 +284,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
                     //   → parseIntが動作する際にデフォルトで10進数と仮定されない場合があるため
                     //     
                     const newValue = parseInt(e.target.value, 10) || 0;
-
                     field.onChange(newValue);
                     // → controlに通知され、値などの状態が更新される
                   }}
                   label="金額" 
                   type="number" 
+                  error={ !!errors.amount }
+                  helperText={ errors.amount?.message }
                 />
               )
             }}
@@ -283,7 +301,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             name="content"
             control={ control }
             render={({ field }) => (
-              <TextField { ...field } label="内容" type="text" />
+              <TextField 
+                { ...field } 
+                label="内容" 
+                type="text" 
+                error={ !!errors.content }
+                helperText={ errors.content?.message }
+              />
             )}
           />
           

@@ -9,13 +9,19 @@ import TransactionMenu from "../components/layout/TransactionMenu";
 import TransactionForm from "../components/layout/TransactionForm";
 import { Transaction } from "../types";
 import { format } from "date-fns";
+import { Schema } from "../validations/schema";
 
 interface HomeProps {
   monthlyTransactions: Transaction[] // オブジェクトの配列
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>
+  handleSaveTransition: (_transaction: Schema) => Promise<void>
 }
 
-const Home: React.FC<HomeProps> = ({ monthlyTransactions, setCurrentMonth }) => {
+const Home: React.FC<HomeProps> = ({ 
+  monthlyTransactions, 
+  setCurrentMonth,
+  handleSaveTransition
+}) => {
   // console.log(monthlyTransactions); // その月の取引履歴のみ
 
   // 今日の日付を取得
@@ -68,6 +74,7 @@ const Home: React.FC<HomeProps> = ({ monthlyTransactions, setCurrentMonth }) => 
           isEntryDrawerOpen={ isEntryDrawerOpen }
           onCloseForm={ onCloseForm } 
           currentDay={ currentDay }
+          handleSaveTransition={ handleSaveTransition }  
         />
       </Box>
     </Box>
