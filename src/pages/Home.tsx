@@ -10,22 +10,19 @@ import TransactionForm from "../components/layout/TransactionForm";
 import { Transaction } from "../types";
 import { format } from "date-fns";
 import { Schema } from "../validations/schema";
-import { cl } from "@fullcalendar/core/internal-common";
 
 interface HomeProps {
   monthlyTransactions: Transaction[] // オブジェクトの配列
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>> // useStateの更新関数の型
   onSaveTransition: (_transaction: Schema) => Promise<void>
-  selectedTransaction: Transaction | null
-  setSelectedTransaction:  React.Dispatch<React.SetStateAction<Transaction | null>>
+  onDeleteTransaction: (_transactionsId: string) => Promise<void>
 }
 
 const Home: React.FC<HomeProps> = ({ 
   monthlyTransactions, 
   setCurrentMonth,
   onSaveTransition,
-  selectedTransaction,
-  setSelectedTransaction,
+  onDeleteTransaction
 }) => {
   // console.log(monthlyTransactions); // その月の取引履歴のみ
 
@@ -35,6 +32,9 @@ const Home: React.FC<HomeProps> = ({
   // console.log(currentDay); // Fri Dec 13 2024 16:26:20 GMT+0900 (日本標準時) ... ローカライズされた文字列表現
   const [ isEntryDrawerOpen, setIsEntryDrawerOpen ] = useState(false); // ドロワーの開閉ステート
 
+   // １日の内の1つの取引のデータを持つ。右サイドのカードのステート
+  const [ selectedTransaction, setSelectedTransaction ] = useState<Transaction | null>(null);
+
   // その月で、取引のあった日のみのデータを取得
   const dailyTransactions = monthlyTransactions.filter(transaction => {
     // console.log(transaction);
@@ -42,13 +42,21 @@ const Home: React.FC<HomeProps> = ({
   });
   // console.log(dailyTransactions);
 
-  const onCloseForm = () => {  // ドロワーに渡すフォームに渡す開閉処理の更新関数
-    setIsEntryDrawerOpen(!isEntryDrawerOpen)
+  // フォームを閉じる処理
+  const onCloseForm = () => {  
+    setIsEntryDrawerOpen(!isEntryDrawerOpen);
+    setSelectedTransaction(null);
   }
 
   // 右サイドバーに渡すフォームの開閉処理の更新関数
   const onHandleAddTransactionForm = () => {
-    setIsEntryDrawerOpen(!isEntryDrawerOpen);
+    if(selectedTransaction){
+      // フォームの内容が選択されている時は開閉処理は行わない(カードがクリックされている時)
+      setSelectedTransaction(null);
+    } else {
+      // フォームの内容が選択されていない時に開閉処理を行う(カードがクリックされていない時)
+      setIsEntryDrawerOpen(!isEntryDrawerOpen);
+    }
   }
 
   // 取引項目(カード)が選択された時の処理 → フォームに反映する
@@ -92,6 +100,8 @@ const Home: React.FC<HomeProps> = ({
           currentDay={ currentDay }
           onSaveTransition={ onSaveTransition }  
           selectedTransaction={ selectedTransaction }
+          onDeleteTransaction={ onDeleteTransaction }
+          setSelectedTransaction={ setSelectedTransaction }
         />
       </Box>
     </Box>

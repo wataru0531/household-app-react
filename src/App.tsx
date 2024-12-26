@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {  BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { addDoc, collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 
 import Home from './pages/Home';
@@ -18,17 +18,12 @@ import { Schema } from './validations/schema';
 
 
 function App() {
-  // console.log(Home);
   const [ transactions, setTransactions ] = useState<Transaction[]>([]);
 
   // 今月の月のステート
   const [ currentMonth, setCurrentMonth ] = useState<Date>(new Date());
   // console.log(currentMonth);
   // console.log(format(currentMonth, "yyyy-MM"));
-
-  // １日の内の1つの取引のデータを持つ。右サイドのカードのステート
-  const [ selectedTransaction, setSelectedTransaction ] = useState<Transaction | null>(null);
-
 
   // FireStoreでのエラーなのか、一般的なエラーなのかを分ける関数
   // 型ガード
@@ -99,20 +94,20 @@ function App() {
     return transaction.date.startsWith(formatMonth(currentMonth));
   });
 
-  // FireStoreにデータを保存
+  // FireStoreにデータを保存 + データのステートを更新
   const onSaveTransition = async (_transaction: Schema) => {
     try{
       // docRef → 挿入したデータを参照するオブジェクト
       const docRef = await addDoc(collection(db, "Transactions"), _transaction );
       // console.log("Document written with ID: ", docRef.id);
 
+      // これまで保持していたデータのstateに新しく追加するデータを追加
       const newTransaction = {
         id: docRef.id, // id
         ..._transaction
       } as Transaction;
       // console.log(newTransaction); // {id: 'YCr1IV0lNZOnfXU5r4WQ', type: 'expense', date: '2024-12-23', amount: 40000, content: '家賃', …}
 
-      // これまで保持していたデータに新しく追加したデータを保持する
       // console.log(transactions)
       // もともとのtransactionの配列にFireStoreに保存したデータを追加する
       setTransactions(prevTransaction => [
@@ -130,6 +125,29 @@ function App() {
   }
 
   // console.log(monthlyTransactions); // 2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', content: '銀行振込', amount: '2000', date: '2024-12-09', …}}, {…}]
+
+  // firestoreからドキュメントを削除する処理。フォームの項目をリセットする処理 
+  const onDeleteTransaction = async (_transactionId: string) => {
+    try{
+      // firestoreのデータ削除
+      // doc(firebaseのdb, コレクション名, ドキュメントのid)
+      await deleteDoc(doc(db, "Transactions", _transactionId));
+
+      // リアルタイムに結果を反映
+      const filteredTransactions = transactions.filter(transaction => transaction.id !== _transactionId);
+      // console.log(filteredTransactions);
+      setTransactions(filteredTransactions); 
+      // → ステートを更新すると再レンダリングの仕組みが働くのでリアルタイムに更新される
+
+    } catch(error){
+      if(isFireStoreError(error)){
+        console.error("firestoreのエラーは: ", error);
+      } else {
+        console.error("一般的なエラーは: ", error);
+      }
+    }
+  }
+
 
   return (
     <ThemeProvider theme={ theme }>
@@ -149,8 +167,7 @@ function App() {
                       monthlyTransactions={ monthlyTransactions } 
                       setCurrentMonth={ setCurrentMonth }
                       onSaveTransition={ onSaveTransition }
-                      selectedTransaction={ selectedTransaction }
-                      setSelectedTransaction={ setSelectedTransaction }
+                      onDeleteTransaction={ onDeleteTransaction }
                     />
                   }
                 />

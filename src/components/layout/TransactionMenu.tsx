@@ -1,6 +1,6 @@
 
 // TransactionMenu (Home)
-// 右コンテンツの、収入、支出、残高、内訳
+// 右コンテンツの日付、収入、支出、残高、内訳
 
 import React from "react";
 import {
@@ -101,6 +101,7 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
                                               : theme.palette.incomeColor.light
                       }}
                       onClick={ () => onSelectTransaction(transaction) }
+                      // → このカードの取引のデータをフォームに反映する
                     >
                       <CardActionArea>
                         <CardContent>

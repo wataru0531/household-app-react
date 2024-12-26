@@ -37,6 +37,8 @@ interface TransactionFormProps {
   currentDay: string
   onSaveTransition: (_transaction: Schema) => Promise<void>
   selectedTransaction: Transaction | null
+  onDeleteTransaction: (_transactionsId: string) => Promise<void>
+  setSelectedTransaction: React.Dispatch<React.SetStateAction<Transaction | null>>
 }
 
 type IncomeExpenseType = "income" | "expense";
@@ -51,8 +53,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   currentDay,
   onSaveTransition,
   selectedTransaction,
+  onDeleteTransaction, // 削除
+  setSelectedTransaction,
 }) => {
   // console.log(currentDay);
+  // console.log(selectedTransaction);
   const formWidth = 320;
 
   // React-Hook-Formの初期化
@@ -151,9 +156,27 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       setValue("category", category);
       setValue("amount", amount);
       setValue("content", content);
+    } else { // nullの時
+      reset({
+        type: "expense",
+        date: currentDay,
+        amount: 0,
+        category: "",
+        content: "",
+      })
     }
   }, [ selectedTransaction ]); // 選択したデータのステートが更新した時にuseEffectを発火
 
+  // フォームの中をリセットする処理 → firestoreからドキュメントを削除
+  const handleDelete = async () => {
+    if(selectedTransaction){
+      await onDeleteTransaction(selectedTransaction.id);
+
+      setSelectedTransaction(null); // その日の1つのデータのステートを空にする
+    }
+  }
+
+  // const onDeleteTransaction = (_id: string | null) => {}
 
   return (
     <Box 
@@ -348,6 +371,21 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           >
             保存
           </Button>
+
+          {
+            // transactionが選択されている場合のみ表示
+            selectedTransaction && (
+              <Button 
+                onClick={ () => handleDelete() }
+                variant="outlined"
+                color={ "secondary"} 
+                fullWidth
+              >
+                削除
+              </Button>
+            )
+          }
+          
         </Stack>
       </Box>
     </Box>
