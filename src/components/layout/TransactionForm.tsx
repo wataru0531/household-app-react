@@ -27,16 +27,16 @@ import SavingsIcon from "@mui/icons-material/Savings";
 import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { ExpenseCategoryType, IncomeCategoryType } from "../../types";
+import { ExpenseCategoryType, IncomeCategoryType, Transaction } from "../../types";
 import { transactionSchema, Schema } from "../../validations/schema";
-import { cl } from "@fullcalendar/core/internal-common";
 
 
 interface TransactionFormProps {
   isEntryDrawerOpen: boolean
   onCloseForm: () => void
   currentDay: string
-  handleSaveTransition: (_transaction: Schema) => Promise<void>
+  onSaveTransition: (_transaction: Schema) => Promise<void>
+  selectedTransaction: Transaction | null
 }
 
 type IncomeExpenseType = "income" | "expense";
@@ -49,7 +49,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   isEntryDrawerOpen,
   onCloseForm,
   currentDay,
-  handleSaveTransition
+  onSaveTransition,
+  selectedTransaction,
 }) => {
   // console.log(currentDay);
   const formWidth = 320;
@@ -60,7 +61,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     handleSubmit,
     formState: { errors },
     setValue, // controlが管理している特定のフィールドの値を更新する関数
-    watch 
+    watch,
+    reset,
   } = useForm<Schema>({
     defaultValues: { // 初期値
       type: "expense",
@@ -80,6 +82,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const incomeExpenseToggle = (_type: IncomeExpenseType) => {
     // RHFの内部で管理している項目に値を入れる
     setValue("type", _type);
+
+    // 収支typeの切り替えで、各項目をリセット
+    setValue("category", "");
+    setValue("amount", 0);
+    setValue("content", "");
   }
 
   // 日付を設定
@@ -91,7 +98,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   const currentType = watch("type"); // watch muiの監視モジュール
   // console.log(currentType);
 
-  // 支出カテゴリ
+  // 支出カテゴリのアイコン
   const expenseCategories: CategoryItemType[] = [
     { label: "食費", icon: <FastfoodIcon fontSize="small" /> },
     { label: "日用品", icon: <AlarmIcon fontSize="small" /> },
@@ -101,7 +108,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     { label: "交通費", icon: <TrainIcon fontSize="small" /> },
   ];
 
-  // 収入カテゴリ
+  // 収入カテゴリのアイコン
   const incomeCategories: CategoryItemType[] = [
     { label: "給与", icon: <WorkIcon fontSize="small" /> },
     { label: "副収入", icon: <SavingsIcon fontSize="small" /> },
@@ -119,12 +126,33 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   }, [ currentType ]); // currentTypw → income、expense
 
   // 送信処理
-  const onSubmit:SubmitHandler<Schema> = (data) => {
+  const onSubmit:SubmitHandler<Schema> =  async (data) => {
     // console.log(data); 
     // // { type: 'expense', date: '2024-12-23', amount: 200, content: 'テスト', category: '食費'}
+    await onSaveTransition(data); // FireStoreにデータを保存
 
-    handleSaveTransition(data); // FireStoreにデータを保存
+    // 全ての項目をデフォルトでリセット
+    // 今日ではない日にちで、リセットした場合、その日の日付が今日(currentDay)になってしまう。
+    reset({ 
+      type: "expense",
+      date: currentDay, // フォームフィールドの内容をデフォルトに
+      amount: 0,
+      category: "",
+      content: "",
+    }); 
   }
+
+  // 各カードをクリック時にフォームに反映する
+  useEffect(() => {
+    if(selectedTransaction){
+      const { type, category, amount, date, content } = selectedTransaction;
+      setValue("type", type);
+      setValue("date", date);
+      setValue("category", category);
+      setValue("amount", amount);
+      setValue("content", content);
+    }
+  }, [ selectedTransaction ]); // 選択したデータのステートが更新した時にuseEffectを発火
 
 
   return (

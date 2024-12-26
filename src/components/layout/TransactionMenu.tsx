@@ -30,13 +30,15 @@ interface TransactionMenuProps {
   currentDay: string
   dailyTransactions: Transaction[]
   onHandleAddTransactionForm: () => void
+  onSelectTransaction: (_transaction: Transaction) => void
 }
 
 
 const TransactionMenu: React.FC<TransactionMenuProps> = ({ 
   currentDay, 
   dailyTransactions,
-  onHandleAddTransactionForm 
+  onHandleAddTransactionForm,
+  onSelectTransaction,
 }) => {
   // console.log(currentDay); // 今日の日付 2024-12-13
   // console.log(dailyTransactions); // 初めは空配列
@@ -89,16 +91,16 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
           <List aria-label="取引履歴">
             <Stack spacing={2}>
               {
-                dailyTransactions.map(({ id, type, category, content, amount }) => (
-                  <ListItem key={ id } disablePadding>
+                dailyTransactions.map((transaction) => (
+                  <ListItem key={ transaction.id } disablePadding>
                     <Card
                       sx={{
                         width: "100%",
                         backgroundColor: (theme) =>
-                          type === "expense" ? theme.palette.expenseColor.light
+                          transaction.type === "expense" ? theme.palette.expenseColor.light
                                               : theme.palette.incomeColor.light
-                          
                       }}
+                      onClick={ () => onSelectTransaction(transaction) }
                     >
                       <CardActionArea>
                         <CardContent>
@@ -110,7 +112,7 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
                           >
                             <Grid item xs={1}>
                               {/* icon */}
-                              { IconComponents[category] }
+                              { IconComponents[transaction.category] }
 
                             </Grid>
                             <Grid item xs={2.5}>
@@ -119,12 +121,12 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
                                 display="block"
                                 gutterBottom
                               >
-                                { category }
+                                { transaction.category }
                               </Typography>
                             </Grid>
                             <Grid item xs={4}>
                               <Typography variant="body2" gutterBottom>
-                                { content }
+                                { transaction.content }
                               </Typography>
                             </Grid>
                             <Grid item xs={4.5}>
@@ -136,7 +138,7 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
                                   wordBreak: "break-all",
                                 }}
                               >
-                                ¥{ formatCurrency(amount) }
+                                ¥{ formatCurrency(transaction.amount) }
                               </Typography>
                             </Grid>
                           </Grid>

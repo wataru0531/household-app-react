@@ -26,6 +26,10 @@ function App() {
   // console.log(currentMonth);
   // console.log(format(currentMonth, "yyyy-MM"));
 
+  // １日の内の1つの取引のデータを持つ。右サイドのカードのステート
+  const [ selectedTransaction, setSelectedTransaction ] = useState<Transaction | null>(null);
+
+
   // FireStoreでのエラーなのか、一般的なエラーなのかを分ける関数
   // 型ガード
   // is演算子
@@ -44,7 +48,7 @@ function App() {
     try{
       const fetchTransactions = async() => {
         // querySnapshot → 指定したコレクション(この場合は "Transactions")のドキュメントを操作するための情報が格納されたオブジェクト
-        // getDocs() → Firestoreから特定のコレクションをやクエリに一致する全てのドキュメントを取得する
+        // getDocs() → Firestoreから特定のコレクションをやクエリに一致する全てのドキュメントを取得
         // collection() → Firestore内の特定のコレクションを参照
         // db → このプロジェクトのデータベースを指す
         const querySnapshot = await getDocs(collection(db, "Transactions"));
@@ -57,11 +61,12 @@ function App() {
           // console.log(typeof doc.id, doc.id)
           
           return { 
-            id: doc.id, // 
+            id: doc.id, // idを参照
             ...doc.data() // プロパティを展開
           } as Transaction; 
           // 型アサーション
-          // → ここでは、doc.idや...doc.data()から取得できる値をtypescriptが判定できないので、何の型が含まれているかを明示してやる
+          // → ここでは、doc.idや...doc.data()から取得できる値をtypescriptが予測/判定できないので、何の型が含まれているかを明示する
+          // 　typescriptにとっては何が取得できるか予測が立たない
         });
         // console.log(transactionsData); // (2) [{id: '6rblq1UPv564Xd32jdlB', content: '銀行振込', date: '2024-12-09', category: '給与', amount: '2000', …, {…}]
         
@@ -95,19 +100,21 @@ function App() {
   });
 
   // FireStoreにデータを保存
-  const handleSaveTransition = async (_transaction: Schema) => {
-
+  const onSaveTransition = async (_transaction: Schema) => {
     try{
+      // docRef → 挿入したデータを参照するオブジェクト
       const docRef = await addDoc(collection(db, "Transactions"), _transaction );
       // console.log("Document written with ID: ", docRef.id);
 
       const newTransaction = {
-        id: docRef.id,
+        id: docRef.id, // id
         ..._transaction
       } as Transaction;
       // console.log(newTransaction); // {id: 'YCr1IV0lNZOnfXU5r4WQ', type: 'expense', date: '2024-12-23', amount: 40000, content: '家賃', …}
 
-      // もともとのtransactionにFireStoreに保存するデータを追加する
+      // これまで保持していたデータに新しく追加したデータを保持する
+      // console.log(transactions)
+      // もともとのtransactionの配列にFireStoreに保存したデータを追加する
       setTransactions(prevTransaction => [
         ...prevTransaction, // 前のステート
         newTransaction      // 新しいステート
@@ -141,7 +148,9 @@ function App() {
                     <Home 
                       monthlyTransactions={ monthlyTransactions } 
                       setCurrentMonth={ setCurrentMonth }
-                      handleSaveTransition={ handleSaveTransition }
+                      onSaveTransition={ onSaveTransition }
+                      selectedTransaction={ selectedTransaction }
+                      setSelectedTransaction={ setSelectedTransaction }
                     />
                   }
                 />

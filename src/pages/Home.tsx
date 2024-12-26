@@ -10,17 +10,22 @@ import TransactionForm from "../components/layout/TransactionForm";
 import { Transaction } from "../types";
 import { format } from "date-fns";
 import { Schema } from "../validations/schema";
+import { cl } from "@fullcalendar/core/internal-common";
 
 interface HomeProps {
   monthlyTransactions: Transaction[] // オブジェクトの配列
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>
-  handleSaveTransition: (_transaction: Schema) => Promise<void>
+  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>> // useStateの更新関数の型
+  onSaveTransition: (_transaction: Schema) => Promise<void>
+  selectedTransaction: Transaction | null
+  setSelectedTransaction:  React.Dispatch<React.SetStateAction<Transaction | null>>
 }
 
 const Home: React.FC<HomeProps> = ({ 
   monthlyTransactions, 
   setCurrentMonth,
-  handleSaveTransition
+  onSaveTransition,
+  selectedTransaction,
+  setSelectedTransaction,
 }) => {
   // console.log(monthlyTransactions); // その月の取引履歴のみ
 
@@ -46,6 +51,16 @@ const Home: React.FC<HomeProps> = ({
     setIsEntryDrawerOpen(!isEntryDrawerOpen);
   }
 
+  // 取引項目(カード)が選択された時の処理 → フォームに反映する
+  const onSelectTransaction = (_transaction: Transaction) => {
+    // console.log(_transaction); // {id: 'EjCj7N2Nt3Hjqhn8L1zM', content: 'KD', amount: 50000, date: '2024-12-25', category: '給与', …}
+    setIsEntryDrawerOpen(true); //カードが選択された時の処理
+
+    // console.log(selectedTransaction);
+    setSelectedTransaction(_transaction);
+    // →　ここで選択した取引データをフォームに渡して、フォームの各項目に反映していく
+  }
+
   return (
     <Box sx={{ display: "flex" }}>
       {/* 左コンテンツ */}
@@ -67,6 +82,7 @@ const Home: React.FC<HomeProps> = ({
           currentDay={ currentDay } 
           dailyTransactions={ dailyTransactions }  
           onHandleAddTransactionForm={ onHandleAddTransactionForm }
+          onSelectTransaction={ onSelectTransaction }
         />
 
         {/* フォーム(ドロワー) */}
@@ -74,7 +90,8 @@ const Home: React.FC<HomeProps> = ({
           isEntryDrawerOpen={ isEntryDrawerOpen }
           onCloseForm={ onCloseForm } 
           currentDay={ currentDay }
-          handleSaveTransition={ handleSaveTransition }  
+          onSaveTransition={ onSaveTransition }  
+          selectedTransaction={ selectedTransaction }
         />
       </Box>
     </Box>
