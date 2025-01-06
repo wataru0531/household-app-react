@@ -3,7 +3,7 @@
 
 import { format } from "date-fns";
 
-// 
+//  ローカルタイムゾーンの文字列表現をyyyy年MM月の形式にフォーマットする
 export function formatMonth(_date: Date): string{ // 引数への型定義
   // console.log(_date); // Wed Dec 11 2024 16:07:38 GMT+0900 (日本標準時)
   // console.log(format(_date, "yyyy-MM")); // 2024-12
@@ -15,7 +15,8 @@ export function formatMonth(_date: Date): string{ // 引数への型定義
 // → Number型（数値）や Date 型（日時）に対して使えるメソッドで、
 // ローカライズされた形式で数値や日付を文字列として返すために使用。
 // 特に、数値を地域ごとの通貨表示や数値フォーマットに変換する際に便利
+// カンマ区切りになる。
 export function formatCurrency(_amount: number): string{
   // console.log(_amount)
-  return _amount.toLocaleString("js-JP");
+  return _amount.toLocaleString("js-JP"); // stringで返す
 }

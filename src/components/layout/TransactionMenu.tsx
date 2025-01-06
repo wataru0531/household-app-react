@@ -20,14 +20,13 @@ import {
 //アイコン
 import NotesIcon from "@mui/icons-material/Notes";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import FastfoodIcon from "@mui/icons-material/Fastfood";
 import DailySummary from "./DailySummary";
 import { Transaction } from "../../types";
 import { formatCurrency } from "../../utils/formatting";
 import { IconComponents } from "../common/IconComponents";
 
 interface TransactionMenuProps {
-  currentDay: string
+  currentDay: string // 2024-12-07
   dailyTransactions: Transaction[]
   onHandleAddTransactionForm: () => void
   onSelectTransaction: (_transaction: Transaction) => void
@@ -76,6 +75,7 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
             <NotesIcon sx={{ mr: 1 }} />
             <Typography variant="body1">内訳</Typography>
           </Box>
+          
           {/* 右側の追加ボタン */}
           <Button 
             startIcon={<AddCircleIcon />} 

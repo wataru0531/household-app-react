@@ -50,7 +50,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
       return {
         start: date,
-        income: formatCurrency(income), // 文字列型に
+        income: formatCurrency(income), // string型に
         expense: formatCurrency(expense),
         balance: formatCurrency(balance)
       }

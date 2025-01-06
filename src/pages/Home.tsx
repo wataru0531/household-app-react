@@ -16,28 +16,29 @@ interface HomeProps {
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>> // useStateの更新関数の型
   onSaveTransition: (_transaction: Schema) => Promise<void>
   onDeleteTransaction: (_transactionsId: string) => Promise<void>
+  onUpdateTransaction: (_transaction: Schema, _transactionsId: string) => Promise<void>
 }
 
 const Home: React.FC<HomeProps> = ({ 
   monthlyTransactions, 
   setCurrentMonth,
   onSaveTransition,
-  onDeleteTransaction
+  onDeleteTransaction,
+  onUpdateTransaction,
 }) => {
   // console.log(monthlyTransactions); // その月の取引履歴のみ
 
-  // 今日の日付を取得
-  const today = format(new Date(), "yyyy-MM-dd"); // 日付形式を変換
+  const today = format(new Date(), "yyyy-MM-dd"); // 今日の日付
   const [ currentDay, setCurrentDay ] = useState(today);
   // console.log(currentDay); // Fri Dec 13 2024 16:26:20 GMT+0900 (日本標準時) ... ローカライズされた文字列表現
   const [ isEntryDrawerOpen, setIsEntryDrawerOpen ] = useState(false); // ドロワーの開閉ステート
 
-   // １日の内の1つの取引のデータを持つ。右サイドのカードのステート
+  // その日における1つの取引のデータ。右サイドのカードのステート
   const [ selectedTransaction, setSelectedTransaction ] = useState<Transaction | null>(null);
 
-  // その月で、取引のあった日のみのデータを取得
+  // 選択されて日の取引データを取得(配列)
   const dailyTransactions = monthlyTransactions.filter(transaction => {
-    // console.log(transaction);
+    // console.log(transaction); // {id: '25ZjJ0OxeuZM4G2jlfL0', type: 'expense', content: '更新料', date: '2024-12-07', amount: 7000, …}
     return transaction.date === currentDay;
   });
   // console.log(dailyTransactions);
@@ -52,6 +53,7 @@ const Home: React.FC<HomeProps> = ({
   const onHandleAddTransactionForm = () => {
     if(selectedTransaction){
       // フォームの内容が選択されている時は開閉処理は行わない(カードがクリックされている時)
+      // → 一度フォームを空にしてから開閉処理を行う
       setSelectedTransaction(null);
     } else {
       // フォームの内容が選択されていない時に開閉処理を行う(カードがクリックされていない時)
@@ -62,7 +64,7 @@ const Home: React.FC<HomeProps> = ({
   // 取引項目(カード)が選択された時の処理 → フォームに反映する
   const onSelectTransaction = (_transaction: Transaction) => {
     // console.log(_transaction); // {id: 'EjCj7N2Nt3Hjqhn8L1zM', content: 'KD', amount: 50000, date: '2024-12-25', category: '給与', …}
-    setIsEntryDrawerOpen(true); //カードが選択された時の処理
+    setIsEntryDrawerOpen(true); // ドロワーを開く
 
     // console.log(selectedTransaction);
     setSelectedTransaction(_transaction);
@@ -99,9 +101,10 @@ const Home: React.FC<HomeProps> = ({
           onCloseForm={ onCloseForm } 
           currentDay={ currentDay }
           onSaveTransition={ onSaveTransition }  
-          selectedTransaction={ selectedTransaction }
           onDeleteTransaction={ onDeleteTransaction }
+          selectedTransaction={ selectedTransaction }
           setSelectedTransaction={ setSelectedTransaction }
+          onUpdateTransaction={ onUpdateTransaction } 
         />
       </Box>
     </Box>

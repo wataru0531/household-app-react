@@ -46,7 +46,7 @@ export function calculateDailyBalances(_transactions: Transaction[]): Record<str
   // Record<string, Balance> → 初期値の{}に対しての型定義。初期値の{}に何が入るのかtypescriptが理解できていない
   return _transactions.reduce<Record<string, Balance>>((accu, curr) => { 
     // (2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', date: '2024-12-09', content: '銀行振込', amount: '2000', …}, {…}]
-    // console.log(accu); // {}、{2024-12-09: {…}}、{2024-12-09: {…}}, {2024-12-09: {…}, 2024-12-03: {…}}
+    // console.log(accu); // {}、{2024-12-09: {income: 300, expense: 1000, balance: 0}}、{2024-12-09: {…}}, {2024-12-09: {…}, 2024-12-03: {…}}
     // console.log(curr); // _transactionが1つづつ渡ってくる
 
     const day = curr.date;

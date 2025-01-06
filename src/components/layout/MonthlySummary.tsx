@@ -18,6 +18,7 @@ interface MonthlySummaryProps {
   monthlyTransactions: Transaction[]
 }
 
+
 const MonthlySummary: React.FC<MonthlySummaryProps> = ({ monthlyTransactions }) => {
   // console.log(monthlyTransactions); // (2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', date: '2024-12-09', content: '銀行振込', amount: '2000', …}, {…}]
 

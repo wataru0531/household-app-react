@@ -35,12 +35,11 @@ export default function AppLayout() {
       setMobileOpen(!mobileOpen);
     }
   };
-
-
+  
   return (
     // sx → style属性のようなもの
     // bgcolor → palleteからgreyの100を適用
-    <Box sx={{ display: 'flex', minHeight: "100vh", bgcolor: (theme) => theme.palette.grey[100] }}>
+    <Box sx={{ display: { md: 'flex' }, minHeight: "100vh", bgcolor: (theme) => theme.palette.grey[100] }}>
       <CssBaseline />
 
       {/* header */}

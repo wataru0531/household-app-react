@@ -36,9 +36,10 @@ interface TransactionFormProps {
   onCloseForm: () => void
   currentDay: string
   onSaveTransition: (_transaction: Schema) => Promise<void>
-  selectedTransaction: Transaction | null
   onDeleteTransaction: (_transactionsId: string) => Promise<void>
+  selectedTransaction: Transaction | null
   setSelectedTransaction: React.Dispatch<React.SetStateAction<Transaction | null>>
+  onUpdateTransaction: (transaction: Schema, _transactionId: string) => Promise<void>
 }
 
 type IncomeExpenseType = "income" | "expense";
@@ -52,9 +53,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   onCloseForm,
   currentDay,
   onSaveTransition,
-  selectedTransaction,
   onDeleteTransaction, // 削除
+  selectedTransaction,
   setSelectedTransaction,
+  onUpdateTransaction,
 }) => {
   // console.log(currentDay);
   // console.log(selectedTransaction);
@@ -131,10 +133,24 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   }, [ currentType ]); // currentTypw → income、expense
 
   // 送信処理
+  // → 更新と追加で分岐
   const onSubmit:SubmitHandler<Schema> =  async (data) => {
     // console.log(data); 
     // // { type: 'expense', date: '2024-12-23', amount: 200, content: 'テスト', category: '食費'}
-    await onSaveTransition(data); // FireStoreにデータを保存
+    
+    // カードの取引が選択されいれば更新処理が走る
+    if(selectedTransaction){
+      // console.log("更新")
+      onUpdateTransaction(data, selectedTransaction.id).then(() => {
+        setSelectedTransaction(null);
+
+      }).catch(error => { console.error(error); });
+
+    } else {
+      // console.log("保存")
+      // FireStoreにデータを追加
+      await onSaveTransition(data); 
+    }
 
     // 全ての項目をデフォルトでリセット
     // 今日ではない日にちで、リセットした場合、その日の日付が今日(currentDay)になってしまう。
@@ -147,10 +163,33 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     }); 
   }
 
-  // 各カードをクリック時にフォームに反映する
+
+  // ⭐️TODO セクション8、60
+  // useEffect(() => {
+  //   // console.log("useEffect")
+  //   // 選択肢が更新されてかを確認
+  //   if(selectedTransaction){
+  //     // some ... 条件色が正しければtrueを返す
+  //     // 選択された取引のカテゴリー名と一致するカテゴリー名を選択肢が持っている場合は選択肢が更新されたということ
+  //     const categoryExists = categories.some(category => 
+  //       category.label === selectedTransaction?.category
+  //     );
+      
+  //     // カテゴリーの選択肢が更新された場合にカテゴリーフィールドに値を代入する
+  //     setValue("category", categoryExists ? selectedTransaction.category : "");
+
+  //   }
+  //   // 初回読み込み、カードが選択された場合、収支typeが選択されたときに発火
+  // }, [ selectedTransaction, categories ]);
+
+
+  // 各カードのデータをクリック時にフォームに反映する
+  // → 各カテゴリの項目が反映されてから、カテゴリの項目が反映される
+  //   これではエラーが出るので、まずカテゴリを各項目にセットしてから、カテゴリに挿入する
   useEffect(() => {
     if(selectedTransaction){
       const { type, category, amount, date, content } = selectedTransaction;
+
       setValue("type", type);
       setValue("date", date);
       setValue("category", category);
@@ -172,7 +211,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     if(selectedTransaction){
       await onDeleteTransaction(selectedTransaction.id);
 
-      setSelectedTransaction(null); // その日の1つのデータのステートを空にする
+      setSelectedTransaction(null); // 選択したデータのステートを空にする
     }
   }
 
@@ -369,7 +408,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             color={ currentType === "income" ? "primary" : "error"} 
             fullWidth
           >
-            保存
+            { selectedTransaction ? "更新" : "保存" }
           </Button>
 
           {

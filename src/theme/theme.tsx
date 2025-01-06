@@ -2,7 +2,6 @@
 // アプリ全体に適用テーマに関するオブジェクト。フォントなど
 // App.tsxで適用
 
-
 import { createTheme, PaletteColor, PaletteColorOptions } from "@mui/material";
 import { blue, green, red } from "@mui/material/colors";
 

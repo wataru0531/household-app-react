@@ -17,7 +17,8 @@ const DailySummary: React.FC<DailySummaryProps> = ({ dailyTransactions }) => {
 
   // その月のその日の、収入、支出を計算して、残高をを取得
   const { income, expense, balance } = financeCalculations(dailyTransactions);
-  // console.log(income, expense, balance); // 0 0 0
+  // console.log(typeof income, income, expense, balance); // number 0 0 0
+  // console.log(typeof formatCurrency(income), formatCurrency(income)); // string
 
   return (
     <Box>

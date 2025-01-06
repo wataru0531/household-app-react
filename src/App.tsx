@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {  BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { addDoc, collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 
 import Home from './pages/Home';
@@ -15,6 +15,7 @@ import { Transaction } from './types';
 import { db } from './firebase';
 import { formatMonth } from './utils/formatting';
 import { Schema } from './validations/schema';
+import { cl } from '@fullcalendar/core/internal-common';
 
 
 function App() {
@@ -24,6 +25,8 @@ function App() {
   const [ currentMonth, setCurrentMonth ] = useState<Date>(new Date());
   // console.log(currentMonth);
   // console.log(format(currentMonth, "yyyy-MM"));
+
+  const [ isLoading, setIsLoading ] = useState(true); // trueでローティング表示
 
   // FireStoreでのエラーなのか、一般的なエラーなのかを分ける関数
   // 型ガード
@@ -38,7 +41,7 @@ function App() {
     return typeof error === "object" && error !== null && "code" in error;
   }
 
-  // FireStoreからデータを取得 → ステートに保持
+  // 取引データを全取得 → ステートに保持
   useEffect(() => {
     try{
       const fetchTransactions = async() => {
@@ -78,16 +81,19 @@ function App() {
       } else {
         console.log("一般的なエラー", error);
       }
+    } finally{
+      setIsLoading(false);
     }
   }, []);
+  // console.log(isLoading);
 
-  // ひと月分(今月分)のデータのみ取得
+  // 1ヶ月分(今月)のデータ
   // transactions または currentMonth の状態が変わるたびに、再評価される
   // → 変更があれば再レンダリングされて、最新の monthlyTransactions が反映される
   //   変更されたstateがあれば、依存しているコンポーネント(この場合は AppもHomeも)が再レンダリングされる
   const monthlyTransactions = transactions.filter((transaction) => {
     // console.log(transaction); // {id: '6rblq1UPv564Xd32jdlB', category: '給与', type: 'income', date: '2024-12-09', amount: '2000', …}
-    // console.log( transaction.date.startsWith(format(currentMonth, "yyyy-MM")))
+    // console.log(transaction.date.startsWith(formatMonth(currentMonth)))
     
     // 今月の月日に合致する月のデータのみstateに保持
     // formatMonth → 日付のフォーマットを変更。例: 2024-12
@@ -101,7 +107,7 @@ function App() {
       const docRef = await addDoc(collection(db, "Transactions"), _transaction );
       // console.log("Document written with ID: ", docRef.id);
 
-      // これまで保持していたデータのstateに新しく追加するデータを追加
+      // これまで保持していた transactions に新しく追加するデータを追加
       const newTransaction = {
         id: docRef.id, // id
         ..._transaction
@@ -148,9 +154,43 @@ function App() {
     }
   }
 
+  // Firestoreのデータを更新する処理
+  const onUpdateTransaction = async (_transaction: Schema, _transactionId: string) => {
+    try{
+      const updateRef = doc(db, "Transactions", _transactionId); // 更新対象を取得
+
+      await updateDoc(updateRef, _transaction);
+
+      // transactionsのステートを更新してリアルタイムに反映する
+      const updatedTransactions = transactions.map(transaction => (
+        // idが同じtransactionのみを更新する。更新されているプロパティが更新される。
+        transaction.id === _transactionId ? { ...transaction, ..._transaction }
+                                          : transaction
+      )) as Transaction[];
+      // → setTransactionsでは、categoryで空文字を許容していないが、updatedTransactionsでは空文字を許容してしまっているため
+
+      setTransactions(updatedTransactions); 
+      // → transactionsをトップレベルのここで更新すると再レンダリングされるためリアルタイムに更新される
+
+    } catch(error){
+      if(isFireStoreError(error)){
+        console.error("Firestoreのエラー: ", error);
+      } else {
+        console.error("一般的なエラー: ", error);
+      }
+    } 
+  }
+
 
   return (
     <ThemeProvider theme={ theme }>
+      {/* 
+      CSSBaseLine
+      → ・グローバルなスタイル（ブラウザのデフォルトスタイルをリセットするCSS）を提供する
+        そのため、ThemeProvider の直下に置くことで、アプリ全体に一貫したスタイルリセットが適用される
+        ・Material-UIを使用している場合、CssBaseline をトップレベルで適用することで、
+        すべてのコンポーネントに対して統一的なスタイルが適用され、意図しないレイアウトの崩れを防げる
+      */}
       <CssBaseline />
       
       <div className="App">
@@ -159,7 +199,10 @@ function App() {
             <Route>
 
               <Route path="/" element={ <AppLayout /> }>
-                {/* index → /にリクエストがあれば、Homeが呼ばれる */}
+                {/* 
+                  index → /にリクエストがあれば、Homeが呼ばれる 
+                  この中のHome、Report、NoMatchは、AppLayoutの中の Outlet として呼び出される
+                */}
                 <Route 
                   index 
                   element={ 
@@ -168,11 +211,23 @@ function App() {
                       setCurrentMonth={ setCurrentMonth }
                       onSaveTransition={ onSaveTransition }
                       onDeleteTransaction={ onDeleteTransaction }
+                      onUpdateTransaction={ onUpdateTransaction }
                     />
                   }
                 />
 
-                <Route path="report" element={ <Report /> }/>
+                <Route
+                  path="report" 
+                  element={ 
+                    <Report
+                      currentMonth={ currentMonth }
+                      setCurrentMonth={ setCurrentMonth }
+                      monthlyTransactions={ monthlyTransactions }
+                      isLoading={ isLoading }
+                    /> 
+                  }
+                  />
+
                 <Route path="*" element={ <NoMatch /> }/>
               </Route>
 

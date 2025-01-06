@@ -26,7 +26,7 @@ export const transactionSchema = z.object({
 
 // TypeScriptの型を生成
 // z.infer() → 定義したスキーマからTypeScriptの型を生成することができる
-export type Schema = z.infer<typeof transactionSchema>
+export type Schema = z.infer<typeof transactionSchema>;
 
 // このような記述となる↓↓
 // type Schema = {
