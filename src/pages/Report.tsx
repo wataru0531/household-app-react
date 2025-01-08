@@ -25,7 +25,7 @@ const Report: React.FC<ReportProps> = ({
   isLoading,
 }) => {
   const commonPaperStyle = {
-    height: { xs: "auto", md: "400px" },
+    height: "400px",
     display: "flex",
     flexDirection: "column",
     p: 2, // padding
@@ -44,12 +44,14 @@ const Report: React.FC<ReportProps> = ({
 
       <Grid2 size={{ xs: 12, md: 4 }}>
         <Paper sx={ commonPaperStyle }>
+          {/* 円グラフ */}
           <CategoryChart />
         </Paper>
       </Grid2>
 
       <Grid2 size={{ xs: 12, md: 8 }}>
         <Paper sx={ commonPaperStyle }>
+          {/* 棒グラフ */}
           <BarChart monthlyTransactions={ monthlyTransactions } isLoading={ isLoading } />
         </Paper>
       </Grid2>

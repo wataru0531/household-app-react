@@ -95,10 +95,8 @@ const BarChart: React.FC<BarChartProps> = ({ monthlyTransactions, isLoading }) =
     ],
   };
 
-  // return (<Bar options={options} data={data} />)
-
   return (
-    <Box>
+    <Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
       {
         isLoading? (
           <CircularProgress /> // ローディング
@@ -114,4 +112,4 @@ const BarChart: React.FC<BarChartProps> = ({ monthlyTransactions, isLoading }) =
   )
 }
 
-export default BarChart
+export default BarChart;
