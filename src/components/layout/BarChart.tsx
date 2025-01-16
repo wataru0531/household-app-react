@@ -43,7 +43,7 @@ const BarChart: React.FC<BarChartProps> = ({ monthlyTransactions, isLoading }) =
   // console.log(theme); // {breakpoints: {…}, direction: 'ltr', components: {…}, palette: {…}, spacing: ƒ, …}
 
   const options = {
-    maintainAspectRatio: false, // アスペクト比は保たない
+    maintainAspectRatio: false, // アスペクト比は保たない(任意に設定)
     responsive: true,
     plugins: {
       legend: {
@@ -67,18 +67,17 @@ const BarChart: React.FC<BarChartProps> = ({ monthlyTransactions, isLoading }) =
   const dataLabels = Object.keys(dailyBalances); // keyの配列を作る。列挙可能なプロパティのみ取得
   // console.log(dataLabels); // (2) ['2025-01-01', '2025-01-06]
 
-  const expenseData = dataLabels.map(dayLabel => {
-    return dailyBalances[dayLabel].expense;
-  });
-  // console.log(expenseData); // (2) [1000, 900]
-
   const incomeData = dataLabels.map(dataLabel => {
     return dailyBalances[dataLabel].income;
   });
   // console.log(incomeData); // (2) [300, 15]
 
-  // ブラフの横軸
+  const expenseData = dataLabels.map(dayLabel => {
+    return dailyBalances[dayLabel].expense;
+  });
+  // console.log(expenseData); // (2) [1000, 900]
 
+  // ブラフの横軸
   const data: ChartData<"bar"> = {
     labels: dataLabels,
     datasets: [

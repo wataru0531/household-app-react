@@ -32,7 +32,6 @@ export function financeCalculations(_transactions: Transaction[]): Balance {
     // → 最初のループが終われば次にループのaccuに設定され、ループが終了したらその最後のaccuが返される
 
   }, { income: 0, expense: 0, balance: 0 }); // 初期値。accuに入る
-
 }
 
 // 日付ごとの収入、支出、残高のオブジェクトを生成
