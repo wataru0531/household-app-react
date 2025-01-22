@@ -16,6 +16,7 @@ interface ReportProps {
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>
   monthlyTransactions: Transaction[]
   isLoading: boolean
+  onDeleteTransaction: (_transactionId: string) => Promise<void>
 }
 
 const Report: React.FC<ReportProps> = ({ 
@@ -23,6 +24,7 @@ const Report: React.FC<ReportProps> = ({
   setCurrentMonth, 
   monthlyTransactions,
   isLoading,
+  onDeleteTransaction,
 }) => {
   // console.log(monthlyTransactions)
   const commonPaperStyle = {
@@ -55,7 +57,7 @@ const Report: React.FC<ReportProps> = ({
       <Grid2 size={{ xs: 12, md: 8 }}>
         <Paper sx={ commonPaperStyle }>
           {/* 棒グラフ */}
-          <BarChart 
+          <BarChart
             monthlyTransactions={ monthlyTransactions } 
             isLoading={ isLoading }
           />
@@ -65,6 +67,7 @@ const Report: React.FC<ReportProps> = ({
       <Grid2 size={{ xs: 12 }}>
         <TransactionTable
           monthlyTransactions={ monthlyTransactions }
+          onDeleteTransaction={ onDeleteTransaction }
         />
       </Grid2>
 

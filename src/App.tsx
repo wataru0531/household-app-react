@@ -133,6 +133,37 @@ function App() {
   // console.log(monthlyTransactions); // 2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', content: '銀行振込', amount: '2000', date: '2024-12-09', …}}, {…}]
 
   // firestoreからドキュメントを削除する処理。フォームの項目をリセットする処理 
+  // const onDeleteTransaction = async (_transactionId: string | string[]) => {
+  //   try{
+  //     if(Array.isArray(_transactionId)){
+  //       const deletePromises = _transactionId.map(id => deleteDoc(doc(db, "Transactions", id)));
+  //       await Promise.all(deletePromises);
+  //     } else {
+  //       // firestoreのデータ削除
+  //       // doc(firebaseのdb, コレクション名, ドキュメントのid)
+  //       await deleteDoc(doc(db, "Transactions", _transactionId));
+  //     }
+
+  //     const filteredTransactions = transactions.filter(transaction => {
+  //       // 削除するidを含まない取引を配列に格納
+  //       return Array.isArray(_transactionId) ? !_transactionId.includes(transaction.id)
+  //                                             : transaction.id !== _transactionId      
+  //     })
+
+  //     // リアルタイムに結果を反映
+  //     // const filteredTransactions = transactions.filter(transaction => transaction.id !== _transactionId);
+  //     // console.log(filteredTransactions);
+  //     setTransactions(filteredTransactions);
+  //     // → ステートを更新すると再レンダリングの仕組みが働くのでリアルタイムに更新される
+
+  //   } catch(error){
+  //     if(isFireStoreError(error)){
+  //       console.error("firestoreのエラーは: ", error);
+  //     } else {
+  //       console.error("一般的なエラーは: ", error);
+  //     }
+  //   }
+  // }
   const onDeleteTransaction = async (_transactionId: string) => {
     try{
       // firestoreのデータ削除
@@ -142,7 +173,7 @@ function App() {
       // リアルタイムに結果を反映
       const filteredTransactions = transactions.filter(transaction => transaction.id !== _transactionId);
       // console.log(filteredTransactions);
-      setTransactions(filteredTransactions); 
+      setTransactions(filteredTransactions);
       // → ステートを更新すると再レンダリングの仕組みが働くのでリアルタイムに更新される
 
     } catch(error){
@@ -224,6 +255,7 @@ function App() {
                       setCurrentMonth={ setCurrentMonth }
                       monthlyTransactions={ monthlyTransactions }
                       isLoading={ isLoading }
+                      onDeleteTransaction={ onDeleteTransaction }
                     /> 
                   }
                   />
