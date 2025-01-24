@@ -4,18 +4,17 @@ import React, { useEffect, useState } from 'react';
 import {  BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { addDoc, collection, getDocs, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { CssBaseline, ThemeProvider } from '@mui/material';
+import { theme } from './theme/theme'; // フォントなど
+import { Transaction } from './types';
+import { db } from './firebase';
+import { formatMonth } from './utils/formatting';
+import { Schema } from './validations/schema';
 
 import Home from './pages/Home';
 import Report from './pages/Report';
 import NoMatch from './pages/NoMatch';
 import './App.css';
 import AppLayout from './components/layout/AppLayout';
-import { theme } from './theme/theme'; // フォントなど
-import { Transaction } from './types';
-import { db } from './firebase';
-import { formatMonth } from './utils/formatting';
-import { Schema } from './validations/schema';
-import { cl } from '@fullcalendar/core/internal-common';
 
 
 function App() {
@@ -133,48 +132,28 @@ function App() {
   // console.log(monthlyTransactions); // 2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', content: '銀行振込', amount: '2000', date: '2024-12-09', …}}, {…}]
 
   // firestoreからドキュメントを削除する処理。フォームの項目をリセットする処理 
-  // const onDeleteTransaction = async (_transactionId: string | string[]) => {
-  //   try{
-  //     if(Array.isArray(_transactionId)){
-  //       const deletePromises = _transactionId.map(id => deleteDoc(doc(db, "Transactions", id)));
-  //       await Promise.all(deletePromises);
-  //     } else {
-  //       // firestoreのデータ削除
-  //       // doc(firebaseのdb, コレクション名, ドキュメントのid)
-  //       await deleteDoc(doc(db, "Transactions", _transactionId));
-  //     }
-
-  //     const filteredTransactions = transactions.filter(transaction => {
-  //       // 削除するidを含まない取引を配列に格納
-  //       return Array.isArray(_transactionId) ? !_transactionId.includes(transaction.id)
-  //                                             : transaction.id !== _transactionId      
-  //     })
-
-  //     // リアルタイムに結果を反映
-  //     // const filteredTransactions = transactions.filter(transaction => transaction.id !== _transactionId);
-  //     // console.log(filteredTransactions);
-  //     setTransactions(filteredTransactions);
-  //     // → ステートを更新すると再レンダリングの仕組みが働くのでリアルタイムに更新される
-
-  //   } catch(error){
-  //     if(isFireStoreError(error)){
-  //       console.error("firestoreのエラーは: ", error);
-  //     } else {
-  //       console.error("一般的なエラーは: ", error);
-  //     }
-  //   }
-  // }
-  const onDeleteTransaction = async (_transactionId: string) => {
+  // 配列にも対応
+  // readonly → 配列の中の要素の変更を防ぐ。
+  const onDeleteTransaction = async (_transactionIds: string | readonly string[]) => {
     try{
-      // firestoreのデータ削除
-      // doc(firebaseのdb, コレクション名, ドキュメントのid)
-      await deleteDoc(doc(db, "Transactions", _transactionId));
+      // 複数ならそのまま配列で、単一なら配列にする
+      const idsToDelete = Array.isArray(_transactionIds) ? _transactionIds : [_transactionIds] 
+      // console.log(idsToDelete);
+
+       // firestoreのデータ削除
+      for(const id of idsToDelete){ 
+        // doc(firebaseのdb, コレクション名, ドキュメントのid)
+        await deleteDoc(doc(db, "Transactions", id));
+      }
 
       // リアルタイムに結果を反映
-      const filteredTransactions = transactions.filter(transaction => transaction.id !== _transactionId);
-      // console.log(filteredTransactions);
+      const filteredTransactions = transactions.filter(transaction => {
+        // idsToDelete配列の中で、transaction.idとは一致しない要素のみを取り出す
+        return !idsToDelete.includes(transaction.id);
+      });
+
       setTransactions(filteredTransactions);
-      // → ステートを更新すると再レンダリングの仕組みが働くのでリアルタイムに更新される
+       // → ステートを更新すると再レンダリングの仕組みが働くのでリアルタイムに更新される
 
     } catch(error){
       if(isFireStoreError(error)){

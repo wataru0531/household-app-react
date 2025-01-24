@@ -65,6 +65,7 @@ export default function AppLayout() {
           </Typography>
         </Toolbar>
       </AppBar>
+      {/* header */}
 
       {/* サイドバー */}
       <Sidebar 
@@ -73,6 +74,7 @@ export default function AppLayout() {
         handleDrawerClose={ handleDrawerClose }
         handleDrawerTransitionEnd={ handleDrawerTransitionEnd }
       />
+      {/* サイドバー */}
       
       {/* mainコンテンツ */}
       <Box
@@ -83,8 +85,8 @@ export default function AppLayout() {
 
         {/* Home, report, noMatchを呼び出す */}
         <Outlet />
-        
       </Box>
+      {/* mainコンテンツ */}
     </Box>
   );
 }

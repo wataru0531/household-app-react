@@ -20,8 +20,10 @@ interface CalendarProps {
   setCurrentMonth:  React.Dispatch<React.SetStateAction<Date>>
   currentDay: string
   setCurrentDay: React.Dispatch<React.SetStateAction<string>>
-  today: string,
+  today: string
+  handleDateClick: (_dateInfo: DateClickArg) => void
 }
+
 
 const Calendar: React.FC<CalendarProps> = ({ 
   monthlyTransactions, 
@@ -29,6 +31,7 @@ const Calendar: React.FC<CalendarProps> = ({
   currentDay,
   setCurrentDay,
   today,
+  handleDateClick,
 }) => {
   // console.log(monthlyTransactions); // (4) [{id: '6rblq1UPv564Xd32jdlB', amount: 2000, category: '給与', type: 'income', content: '銀行振込', …}, {…}, {…}, {…}]
 
@@ -110,11 +113,6 @@ const Calendar: React.FC<CalendarProps> = ({
     if(isSameMonth(todayDate, currentMonth)){ // 今日の日付が今月の内ならtrue
       setCurrentDay(today);
     }
-  }
-
-  const handleDateClick = (_dateInfo: DateClickArg) => {
-    // console.log(_dateInfo); // {date: Sun Dec 01 2024 00:00:00 GMT+0900 (日本標準時), dateStr: '2024-12-01', allDay: true, dayEl: td.fc-day.fc-day-sun.fc-day-past.fc-daygrid-day, jsEvent: MouseEvent, …}
-    setCurrentDay(_dateInfo.dateStr);
   }
 
   return (

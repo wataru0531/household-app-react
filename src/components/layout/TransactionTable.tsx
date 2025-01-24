@@ -39,8 +39,11 @@ interface TransactionTableHeadProps {
 // tr: table row 
 // th: table head
 // td: table data
-function TransactionTableHead(props: TransactionTableHeadProps) {
-  const { onSelectAllClick, numSelected, rowCount,} = props;
+function TransactionTableHead({ 
+  onSelectAllClick, 
+  numSelected, 
+  rowCount 
+}: TransactionTableHeadProps) {
 
   return (
     <TableHead>
@@ -80,10 +83,7 @@ function TransactionTableToolbar({
   return (
     <Toolbar
       sx={[
-        {
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-        },
+        { pl: { sm: 2 }, pr: { xs: 1, sm: 1 } },
         numSelected > 0 && {
           bgcolor: (theme) =>
             alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
@@ -155,17 +155,17 @@ function FinancialItem({ title, color, value  }: financialTypeProps){
 
 interface TransactionTableProps {
   monthlyTransactions: Transaction[]
-  onDeleteTransaction: (_transactionId: string) => Promise<void>
+  onDeleteTransaction: (_transactionId: string | readonly string[]) => Promise<void>
 }
 
 // テーブル
 export default function TransactionTable({ monthlyTransactions, onDeleteTransaction }: TransactionTableProps) {
   // console.log(monthlyTransactions);
 
-  // theme
   const theme = useTheme();
-  // 取引のid
-  const [selected, setSelected] = React.useState<readonly string[]>([]);
+  // selected → 取引のidの配列
+  const [ selected, setSelected ] = React.useState<string[]>([]);
+  
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
@@ -183,7 +183,7 @@ export default function TransactionTable({ monthlyTransactions, onDeleteTransact
   // 
   const handleClick = (event: React.MouseEvent<unknown>, id: string) => {
     const selectedIndex = selected.indexOf(id);
-    let newSelected: readonly string[] = [];
+    let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, id);
@@ -250,7 +250,7 @@ export default function TransactionTable({ monthlyTransactions, onDeleteTransact
     // console.log("delete");
     // console.log(selected)
 
-    // onDeleteTransaction()
+    onDeleteTransaction(selected);
 
     setSelected([]);
   }

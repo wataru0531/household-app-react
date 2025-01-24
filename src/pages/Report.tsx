@@ -16,7 +16,7 @@ interface ReportProps {
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>
   monthlyTransactions: Transaction[]
   isLoading: boolean
-  onDeleteTransaction: (_transactionId: string) => Promise<void>
+  onDeleteTransaction: (_transactionId: string | readonly string[]) => Promise<void>
 }
 
 const Report: React.FC<ReportProps> = ({ 

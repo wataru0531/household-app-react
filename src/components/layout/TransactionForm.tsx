@@ -1,6 +1,6 @@
 
-// フォーム
-// ドロワーとなっている
+// 入力フォーム
+// モーダルとして表示
 
 import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,6 +8,8 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Dialog,
+  DialogContent,
   FormControl,
   FormHelperText,
   IconButton,
@@ -40,10 +42,13 @@ interface TransactionFormProps {
   onCloseForm: () => void
   currentDay: string
   onSaveTransition: (_transaction: Schema) => Promise<void>
-  onDeleteTransaction: (_transactionsId: string) => Promise<void>
+  onDeleteTransaction: (_transactionsId: string | readonly string[]) => Promise<void>
   selectedTransaction: Transaction | null
   setSelectedTransaction: React.Dispatch<React.SetStateAction<Transaction | null>>
   onUpdateTransaction: (transaction: Schema, _transactionId: string) => Promise<void>
+  isMobile: boolean
+  isDialogOpen: boolean
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 type IncomeExpenseType = "income" | "expense";
@@ -51,6 +56,7 @@ interface CategoryItemType {
   label: IncomeCategoryType | ExpenseCategoryType
   icon: JSX.Element // React要素としての型
 }
+
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ 
   isEntryDrawerOpen,
@@ -61,6 +67,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   selectedTransaction,
   setSelectedTransaction,
   onUpdateTransaction,
+  isMobile,
+  isDialogOpen,
+  setIsDialogOpen,
 }) => {
   // console.log(currentDay);
   // console.log(selectedTransaction);
@@ -142,13 +151,17 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     // console.log(data); 
     // // { type: 'expense', date: '2024-12-23', amount: 200, content: 'テスト', category: '食費'}
     
-    // カードの取引が選択されいれば更新処理が走る
+    // カードの取引が選択されていれば更新処理が走る
     if(selectedTransaction){
       // console.log("更新")
-      onUpdateTransaction(data, selectedTransaction.id).then(() => {
+      onUpdateTransaction(data, selectedTransaction.id)
+      .then(() => {
         setSelectedTransaction(null);
 
-      }).catch(error => { console.error(error); });
+        if(isMobile) setIsDialogOpen(false); // Dialogを閉じる
+      })
+      .catch(error => { console.error(error); })
+
 
     } else {
       // console.log("保存")
@@ -216,32 +229,17 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
       await onDeleteTransaction(selectedTransaction.id);
 
       setSelectedTransaction(null); // 選択したデータのステートを空にする
+
+      if(isMobile){
+        setIsDialogOpen(false); // Dialogを閉じる
+      }
+      
     }
   }
 
-  // const onDeleteTransaction = (_id: string | null) => {}
-
-  return (
-    <Box 
-      sx={{
-        position: "fixed",
-        top: 64,
-        right: isEntryDrawerOpen ? formWidth : "-2%", // フォームの位置を調整
-        width: formWidth,
-        height: "100%",
-        bgcolor: "background.paper",
-        zIndex: (theme) => theme.zIndex.drawer - 1,
-        // フォームの開閉のアニメーション
-        transition: (theme) => 
-          theme.transitions.create("right", {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        p: 2, // 内部の余白
-        boxSizing: "border-box", // ボーダーとパディングをwidthに含める
-        boxShadow: "0px 0px 15px -5px #777777",
-      }}
-    >
+  // フォームの
+  const formContent = (
+    <>
       {/* 入力エリアヘッダー */}
       <Box display={"flex"} justifyContent={"space-between"} mb={2}>
         <Typography variant="h6">入力</Typography>
@@ -417,7 +415,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
             { selectedTransaction ? "更新" : "保存" }
           </Button>
 
-          {
+          { 
+            // 削除ボタン
             // transactionが選択されている場合のみ表示
             selectedTransaction && (
               <Button 
@@ -433,7 +432,57 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
           
         </Stack>
       </Box>
-    </Box>
+    </>
+  )
+
+
+  return (
+    <>
+      {
+        isMobile ? (  
+          // モバイル →　ダイアログを使う
+          <Dialog 
+            open={ isDialogOpen } // 初期値はfalse
+            fullWidth
+            maxWidth={"sm"}
+            onClose={ onCloseForm }
+          >
+            <DialogContent>
+              { formContent }
+            </DialogContent>
+          </Dialog>
+
+        ) : (
+          // PC
+          <Box 
+            sx={{
+              position: "fixed",
+              top: 64,
+              right: isEntryDrawerOpen ? formWidth : "-2%", // フォームの位置を調整
+              width: formWidth,
+              height: "100%",
+              bgcolor: "background.paper",
+              zIndex: (theme) => theme.zIndex.drawer - 1,
+              // フォームの開閉のアニメーション
+              transition: (theme) => 
+                theme.transitions.create("right", {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
+              p: 2, // 内部の余白
+              boxSizing: "border-box", // ボーダーとパディングをwidthに含める
+              boxShadow: "0px 0px 15px -5px #777777",
+            }}
+          >
+
+            { formContent }
+            
+          </Box>
+        )
+      }
+    </>
+
+    
   );
 };
 export default TransactionForm;

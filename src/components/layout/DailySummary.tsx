@@ -10,9 +10,13 @@ import { financeCalculations } from "../../utils/financeCalculations";
 
 interface DailySummaryProps {
   dailyTransactions: Transaction[]
+  columns: number
 }
 
-const DailySummary: React.FC<DailySummaryProps> = ({ dailyTransactions }) => {
+const DailySummary: React.FC<DailySummaryProps> = ({ 
+  dailyTransactions,
+  columns, 
+}) => {
   // console.log(dailyTransactions); // 2) [{id: 'BgRONz7JT6mc89uZyejJ', content: 'モバイルモニター', category: '娯楽', amount: 7200, date: '2024-12-09', …}, {…}]
 
   // その月のその日の、収入、支出を計算して、残高をを取得
@@ -20,11 +24,15 @@ const DailySummary: React.FC<DailySummaryProps> = ({ dailyTransactions }) => {
   // console.log(typeof income, income, expense, balance); // number 0 0 0
   // console.log(typeof formatCurrency(income), formatCurrency(income)); // string
 
+  // モバイルかPCかを判定。3列ならモバイル
+  const isThreeColumnsLayout = columns === 3;
+
   return (
     <Box>
       <Grid container spacing={2}>
         {/* 収入 */}
-        <Grid item xs={6} display={"flex"}>
+        {/* 全体幅は12。モバイル時は3列、PC時は1列 */}
+        <Grid item xs={ isThreeColumnsLayout ? 4 : 6} display={"flex"}> 
           <Card
             sx={{ bgcolor: (theme) => theme.palette.grey[100], flexGrow: 1 }}
           >
@@ -45,7 +53,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ dailyTransactions }) => {
         </Grid>
 
         {/* 支出 */}
-        <Grid item xs={6} display={"flex"}>
+        <Grid item xs={ isThreeColumnsLayout ? 4 : 6} display={"flex"}>
           <Card
             sx={{ bgcolor: (theme) => theme.palette.grey[100], flexGrow: 1 }}
           >
@@ -66,7 +74,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({ dailyTransactions }) => {
         </Grid>
 
         {/* 残高 */}
-        <Grid item xs={12} display={"flex"}>
+        <Grid item xs={ isThreeColumnsLayout ? 4 : 12} display={"flex"}>
           <Card
             sx={{ bgcolor: (theme) => theme.palette.grey[100], flexGrow: 1 }}
           >

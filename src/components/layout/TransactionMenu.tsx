@@ -30,6 +30,9 @@ interface TransactionMenuProps {
   dailyTransactions: Transaction[]
   onHandleAddTransactionForm: () => void
   onSelectTransaction: (_transaction: Transaction) => void
+  isMobile: boolean
+  isMobileDrawerOpen: boolean
+  handleCloseMobileDrawer: () => void
 }
 
 
@@ -38,6 +41,9 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
   dailyTransactions,
   onHandleAddTransactionForm,
   onSelectTransaction,
+  isMobile,
+  isMobileDrawerOpen,
+  handleCloseMobileDrawer,
 }) => {
   // console.log(currentDay); // 今日の日付 2024-12-13
   // console.log(dailyTransactions); // 初めは空配列
@@ -45,19 +51,40 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
   const menuDrawerWidth = 320;
 
   return (
+    // 右サイドバー
     <Drawer
       sx={{
-        width: menuDrawerWidth,
+        width: isMobile ? "auto" : menuDrawerWidth,
         "& .MuiDrawer-paper": {
-          width: menuDrawerWidth,
+          width: isMobile ? "auto" : menuDrawerWidth, // 320px
           boxSizing: "border-box",
           p: 2,
-          top: 64,
-          height: `calc(100% - 64px)`, // AppBarの高さを引いたビューポートの高さ
+
+          // ... スプレッド演算子でプロパティを抽出する
+          ...(isMobile && { // モバイルサイズのスタイルを記述
+            height: "80vh",
+            borderTopRightRadius: 8,
+            borderTopLeftRadius: 8,
+          }),
+          ...(!isMobile && { // モバイルサイズではない時の表示
+            top: 64,
+            height: `calc(100% - 64px)`, // AppBarの高さを引いたビューポートの高さ
+
+          })
         },
       }}
-      variant={"permanent"}
-      anchor={"right"}
+
+      // variant → 右サイドバーを表示しいておくかどうか
+      variant={ isMobile ? "temporary" : "permanent" } // permanent ... 右サイドバーが初めから固定で商事される
+      anchor={ isMobile ? "bottom" : "right" }
+
+      // 右サイドバーを表示(temporaryを指定しておいた場合はtrueで表示される)
+      // → カレンダーをクリックしたら表示される
+      open={ isMobileDrawerOpen } 
+      onClose={ handleCloseMobileDrawer } // 閉じる処理。黒背景をクリックしたら閉じる
+      ModalProps={{
+        keepMounted: true, // Better open performance on mobile.
+      }}
     >
       {/* Stackで囲うことで、ここでは要素を縦に均等配置できる */}
       <Stack sx={{ height: "100%" }} spacing={2}>
@@ -65,9 +92,12 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
         <Typography fontWeight={"fontWeightBold"}>日時：{ currentDay }</Typography>
 
         {/* 収入、支出、残高、内訳 */}
-        <DailySummary dailyTransactions={ dailyTransactions }/>
+        <DailySummary 
+          dailyTransactions={ dailyTransactions }
+          columns={ isMobile ? 3 : 2 } // モバイルの時は3列、PCの時は2列
+        />
 
-        {/* 内訳タイトル&内訳追加ボタン */}
+        {/* 内訳タイトル & 内訳追加ボタン */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1 }} >
           
           {/* 左側のメモアイコンとテキスト */}
