@@ -1,7 +1,7 @@
 
 // Home
-import { useState } from "react";
-import { Box, useMediaQuery } from "@mui/material";
+import { useContext, useState } from "react";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { format } from "date-fns";
 
 import MonthlySummary from "../components/layout/MonthlySummary";
@@ -10,13 +10,13 @@ import TransactionMenu from "../components/layout/TransactionMenu";
 import TransactionForm from "../components/layout/TransactionForm";
 import { Transaction } from "../types";
 import { Schema } from "../validations/schema";
-import { theme } from "../theme/theme";
 import { DateClickArg } from "@fullcalendar/interaction";
+import { AppContext } from "../context/AppContext";
 
 interface HomeProps {
   monthlyTransactions: Transaction[] // オブジェクトの配列
   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>> // useStateの更新関数の型
-  onSaveTransition: (_transaction: Schema) => Promise<void>
+  onSaveTransaction: (_transaction: Schema) => Promise<void>
   onDeleteTransaction: (_transactionsId: string | readonly string[]) => Promise<void>
   onUpdateTransaction: (_transaction: Schema, _transactionsId: string) => Promise<void>
 }
@@ -24,15 +24,23 @@ interface HomeProps {
 const Home: React.FC<HomeProps> = ({ 
   monthlyTransactions, 
   setCurrentMonth,
-  onSaveTransition,
+  onSaveTransaction,
   onDeleteTransaction,
   onUpdateTransaction,
 }) => {
   // console.log(monthlyTransactions); // その月の取引履歴のみ
 
+  // グローバルな値を取得
+  const context = useContext(AppContext);
+  // console.log(context); // {transactions: Array(0), setTransactions: ƒ}
+  // console.log(context?.transactions);
+
+
+
   // レスポンシブ
   // sm: 600px md: 900px, lg: 1200px
   // ここでは、1200pxを下回ればtrueを返す
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
   // console.log(isMobile);
 
@@ -152,7 +160,7 @@ const Home: React.FC<HomeProps> = ({
           isEntryDrawerOpen={ isEntryDrawerOpen }
           onCloseForm={ onCloseForm } 
           currentDay={ currentDay }
-          onSaveTransition={ onSaveTransition }  
+          onSaveTransaction={ onSaveTransaction }  
           onDeleteTransaction={ onDeleteTransaction }
           selectedTransaction={ selectedTransaction }
           setSelectedTransaction={ setSelectedTransaction }

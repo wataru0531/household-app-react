@@ -35,13 +35,14 @@ import AddBusinessIcon from "@mui/icons-material/AddBusiness";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { ExpenseCategoryType, IncomeCategoryType, Transaction } from "../../types";
 import { transactionSchema, Schema } from "../../validations/schema";
+import { useAppContext } from "../../context/AppContext";
 
 
 interface TransactionFormProps {
   isEntryDrawerOpen: boolean
   onCloseForm: () => void
   currentDay: string
-  onSaveTransition: (_transaction: Schema) => Promise<void>
+  onSaveTransaction: (_transaction: Schema) => Promise<void>
   onDeleteTransaction: (_transactionsId: string | readonly string[]) => Promise<void>
   selectedTransaction: Transaction | null
   setSelectedTransaction: React.Dispatch<React.SetStateAction<Transaction | null>>
@@ -62,7 +63,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   isEntryDrawerOpen,
   onCloseForm,
   currentDay,
-  onSaveTransition,
+  onSaveTransaction,
   onDeleteTransaction, // 削除
   selectedTransaction,
   setSelectedTransaction,
@@ -71,6 +72,15 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   isDialogOpen,
   setIsDialogOpen,
 }) => {
+  // 
+  // const context = useContext(AppContext);
+  // console.log(context);
+
+  const context = useAppContext();
+  // console.log(context);
+
+
+
   // console.log(currentDay);
   // console.log(selectedTransaction);
   const formWidth = 320;
@@ -166,7 +176,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
     } else {
       // console.log("保存")
       // FireStoreにデータを追加
-      await onSaveTransition(data); 
+      await onSaveTransaction(data); 
     }
 
     // 全ての項目をデフォルトでリセット

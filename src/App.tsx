@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useState } from 'react';
 import {  BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { addDoc, collection, getDocs, doc, deleteDoc, updateDoc } from 'firebase/firestore';
@@ -15,6 +14,8 @@ import Report from './pages/Report';
 import NoMatch from './pages/NoMatch';
 import './App.css';
 import AppLayout from './components/layout/AppLayout';
+import { AppContextProvider } from './context/AppContext';
+import { isFireStoreError } from './utils/errorHanding';
 
 
 function App() {
@@ -26,19 +27,6 @@ function App() {
   // console.log(format(currentMonth, "yyyy-MM"));
 
   const [ isLoading, setIsLoading ] = useState(true); // trueでローティング表示
-
-  // FireStoreでのエラーなのか、一般的なエラーなのかを分ける関数
-  // 型ガード
-  // is演算子
-  // → 関数が特定の型を返すことを TypeScript に明示的に示すことができる
-  //   この構文は、型ガード と呼ばれ、関数が true を返した場合、型システムがその引数の型を絞り込むために利用される
-  //   この関数が true を返した時にのみ 型を絞り込んで指定した型として扱われ、false を返した時には引数の型を絞り込まない
-  //   ⭐️型ガードを活用することで、条件に応じた型絞り込みができ、型安全なコードを実現することができ
-  // この場合はtrueを返した時に、errorは{ code: string, message: string } この型を持つとtypescriptに明示的に伝える
-  function isFireStoreError(error: unknown): error is { code: string, message: string }{
-    // errorはオブジェクトである。errorオブジェクトにはcodeが含まれている
-    return typeof error === "object" && error !== null && "code" in error;
-  }
 
   // 取引データを全取得 → ステートに保持
   useEffect(() => {
@@ -100,7 +88,7 @@ function App() {
   });
 
   // FireStoreにデータを保存 + データのステートを更新
-  const onSaveTransition = async (_transaction: Schema) => {
+  const onSaveTransaction = async (_transaction: Schema) => {
     try{
       // docRef → 挿入したデータを参照するオブジェクト
       const docRef = await addDoc(collection(db, "Transactions"), _transaction );
@@ -193,60 +181,62 @@ function App() {
 
 
   return (
-    <ThemeProvider theme={ theme }>
-      {/* 
-      CSSBaseLine
-      → ・グローバルなスタイル（ブラウザのデフォルトスタイルをリセットするCSS）を提供する
-        そのため、ThemeProvider の直下に置くことで、アプリ全体に一貫したスタイルリセットが適用される
-        ・Material-UIを使用している場合、CssBaseline をトップレベルで適用することで、
-        すべてのコンポーネントに対して統一的なスタイルが適用され、意図しないレイアウトの崩れを防げる
-      */}
-      <CssBaseline />
+    <AppContextProvider>
+      <ThemeProvider theme={ theme }>
+        {/* 
+        CSSBaseLine
+        → ・グローバルなスタイル（ブラウザのデフォルトスタイルをリセットするCSS）を提供する
+          そのため、ThemeProvider の直下に置くことで、アプリ全体に一貫したスタイルリセットが適用される
+          ・Material-UIを使用している場合、CssBaseline をトップレベルで適用することで、
+          すべてのコンポーネントに対して統一的なスタイルが適用され、意図しないレイアウトの崩れを防げる
+        */}
+        <CssBaseline />
       
-      <div className="App">
-        <Router>
-          <Routes>
-            <Route>
+        <div className="App">
+          <Router>
+            <Routes>
+              <Route>
 
-              <Route path="/" element={ <AppLayout /> }>
-                {/* 
-                  index → /にリクエストがあれば、Homeが呼ばれる 
-                  この中のHome、Report、NoMatchは、AppLayoutの中の Outlet として呼び出される
-                */}
-                <Route 
-                  index 
-                  element={ 
-                    <Home 
-                      monthlyTransactions={ monthlyTransactions } 
-                      setCurrentMonth={ setCurrentMonth }
-                      onSaveTransition={ onSaveTransition }
-                      onDeleteTransaction={ onDeleteTransaction }
-                      onUpdateTransaction={ onUpdateTransaction }
-                    />
-                  }
-                />
-
-                <Route
-                  path="report" 
-                  element={ 
-                    <Report
-                      currentMonth={ currentMonth }
-                      setCurrentMonth={ setCurrentMonth }
-                      monthlyTransactions={ monthlyTransactions }
-                      isLoading={ isLoading }
-                      onDeleteTransaction={ onDeleteTransaction }
-                    /> 
-                  }
+                <Route path="/" element={ <AppLayout /> }>
+                  {/* 
+                    index → /にリクエストがあれば、Homeが呼ばれる 
+                    この中のHome、Report、NoMatchは、AppLayoutの中の Outlet として呼び出される
+                  */}
+                  <Route 
+                    index 
+                    element={ 
+                      <Home 
+                        monthlyTransactions={ monthlyTransactions } 
+                        setCurrentMonth={ setCurrentMonth }
+                        onSaveTransaction={ onSaveTransaction }
+                        onDeleteTransaction={ onDeleteTransaction }
+                        onUpdateTransaction={ onUpdateTransaction }
+                      />
+                    }
                   />
 
-                <Route path="*" element={ <NoMatch /> }/>
-              </Route>
+                  <Route
+                    path="report" 
+                    element={ 
+                      <Report
+                        currentMonth={ currentMonth }
+                        setCurrentMonth={ setCurrentMonth }
+                        monthlyTransactions={ monthlyTransactions }
+                        isLoading={ isLoading }
+                        onDeleteTransaction={ onDeleteTransaction }
+                      /> 
+                    }
+                    />
 
-            </Route>
-          </Routes>
-        </Router>
-      </div>
-    </ThemeProvider>
+                  <Route path="*" element={ <NoMatch /> }/>
+                </Route>
+
+              </Route>
+            </Routes>
+          </Router>
+        </div>
+      </ThemeProvider>
+    </AppContextProvider>
   );
 }
 
