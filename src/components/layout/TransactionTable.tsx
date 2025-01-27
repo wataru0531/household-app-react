@@ -27,6 +27,8 @@ import { Typography } from '@mui/material';
 import { formatCurrency } from '../../utils/formatting';
 import { IconComponents } from '../common/IconComponents';
 import { compareDesc, parseISO } from 'date-fns';
+import { useAppContext } from '../../context/AppContext';
+import useMonthlyTransactions from '../../hooks/useMonthlyTransactions';
 
 interface TransactionTableHeadProps {
   numSelected: number;
@@ -153,14 +155,19 @@ function FinancialItem({ title, color, value  }: financialTypeProps){
 
 
 
-interface TransactionTableProps {
-  monthlyTransactions: Transaction[]
-  onDeleteTransaction: (_transactionId: string | readonly string[]) => Promise<void>
-}
+// interface TransactionTableProps {
+//   monthlyTransactions: Transaction[]
+//   onDeleteTransaction: (_transactionId: string | readonly string[]) => Promise<void>
+// }
 
 // テーブル
-export default function TransactionTable({ monthlyTransactions, onDeleteTransaction }: TransactionTableProps) {
+export default function TransactionTable(
+  // { monthlyTransactions, onDeleteTransaction }: TransactionTableProps
+) {
   // console.log(monthlyTransactions);
+
+  const monthlyTransactions = useMonthlyTransactions();
+  const { onDeleteTransaction } = useAppContext();
 
   const theme = useTheme();
   // selected → 取引のidの配列

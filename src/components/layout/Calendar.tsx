@@ -13,11 +13,13 @@ import { Balance, CalenderContent, Transaction } from "../../types";
 import { formatCurrency } from "../../utils/formatting";
 import { useTheme } from "@mui/material";
 import { isSameMonth } from "date-fns";
+import useMonthlyTransactions from "../../hooks/useMonthlyTransactions";
+import { useAppContext } from "../../context/AppContext";
 
 
 interface CalendarProps {
-  monthlyTransactions: Transaction[]
-  setCurrentMonth:  React.Dispatch<React.SetStateAction<Date>>
+  // monthlyTransactions: Transaction[]
+  // setCurrentMonth:  React.Dispatch<React.SetStateAction<Date>>
   currentDay: string
   setCurrentDay: React.Dispatch<React.SetStateAction<string>>
   today: string
@@ -26,8 +28,8 @@ interface CalendarProps {
 
 
 const Calendar: React.FC<CalendarProps> = ({ 
-  monthlyTransactions, 
-  setCurrentMonth,
+//   monthlyTransactions, 
+//   setCurrentMonth,
   currentDay,
   setCurrentDay,
   today,
@@ -36,6 +38,9 @@ const Calendar: React.FC<CalendarProps> = ({
   // console.log(monthlyTransactions); // (4) [{id: '6rblq1UPv564Xd32jdlB', amount: 2000, category: '給与', type: 'income', content: '銀行振込', …}, {…}, {…}, {…}]
 
   const theme = useTheme(); // themeオブジェクトを使えるようにする
+
+  const monthlyTransactions = useMonthlyTransactions();
+  const { setCurrentMonth } = useAppContext();
 
   // 日付ごとの収入、支出、残高のオブジェクトを生成
   const dailyBalances = calculateDailyBalances(monthlyTransactions);

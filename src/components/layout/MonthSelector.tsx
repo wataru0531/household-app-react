@@ -7,15 +7,19 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3"
 import { addMonths } from 'date-fns';
 import { ja } from "date-fns/locale";
+import { useAppContext } from '../../context/AppContext';
 
-interface MonthSelectorProps {
-  currentMonth: Date
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>
-}
+// interface MonthSelectorProps {
+//   currentMonth: Date
+//   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>>
+// }
 
 
-const MonthSelector: React.FC<MonthSelectorProps> = ({ currentMonth, setCurrentMonth }) => {
+// const MonthSelector: React.FC<MonthSelectorProps> = ({ currentMonth, setCurrentMonth }) => {
+const MonthSelector = () => {
   // console.log(currentMonth); // Wed Jan 01 2025 16:09:15 GMT+0900 (日本標準時)
+
+  const { currentMonth, setCurrentMonth } = useAppContext();
 
   // 先月ボタン
   const handlePreviousMonth = () => {

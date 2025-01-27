@@ -1,13 +1,13 @@
 
 // コンテキスト
 
-
-import { createContext, useContext, useState } from "react";
-import { Transaction } from "../types";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useMediaQuery, useTheme } from "@mui/material";
 import { Schema } from "../validations/schema";
-import { addDoc, collection, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
+
+import { Transaction } from "../types";
 import { isFireStoreError } from "../utils/errorHanding";
 
 interface AppContextType {
@@ -23,13 +23,15 @@ interface AppContextType {
   onUpdateTransaction: (_transaction: Schema, _transactionId: string) => Promise<void>
 }
 
-// 
+// 値を格納するコンテキストを誠意性
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 
 interface AppContextProviderPropsType {
   children: React.ReactNode
 }
+
+
 export const AppContextProvider: React.FC<AppContextProviderPropsType> = ({ children }) => {
 
   const [ transactions, setTransactions ] = useState<Transaction[]>([]);
@@ -48,7 +50,7 @@ export const AppContextProvider: React.FC<AppContextProviderPropsType> = ({ chil
       // これまで保持していた transactions に新しく追加するデータを追加
       const newTransaction = {
         id: docRef.id, // id
-        ..._transaction
+        ..._transaction // プロパティを取得して並べる
       } as Transaction;
       // console.log(newTransaction); // {id: 'YCr1IV0lNZOnfXU5r4WQ', type: 'expense', date: '2024-12-23', amount: 40000, content: '家賃', …}
 
@@ -83,6 +85,8 @@ export const AppContextProvider: React.FC<AppContextProviderPropsType> = ({ chil
         // doc(firebaseのdb, コレクション名, ドキュメントのid)
         await deleteDoc(doc(db, "Transactions", id));
       }
+
+      // await Promise.all(idsToDelete.map(id => deleteDoc(doc(db, "Transactions", id))));
 
       // リアルタイムに結果を反映
       const filteredTransactions = transactions.filter(transaction => {
@@ -129,11 +133,11 @@ export const AppContextProvider: React.FC<AppContextProviderPropsType> = ({ chil
     } 
   }
 
-  // プロバイダーの外部でコンテキストの値を取得しようとするとエラーとなる
-  // const context = useAppContext(); 
-
-
   return(
+    // context APIは、特定のデータが更新されるとその他の値も更新される
+    // 例えば、transactionsが更新されたらその他のデータも更新され、子コンポーネントが更新される
+    // → 不要なレンダリングが生まれてしまい更新が止まる
+    // ⭐️ジャンルごとに各コンテキストを分けて管理する
     <AppContext.Provider value={{ 
       transactions, // キーと値が同じなら省略できる
       setTransactions,
@@ -153,7 +157,7 @@ export const AppContextProvider: React.FC<AppContextProviderPropsType> = ({ chil
 
 
 // カスタムフック 
-// コンテキストのデータが取得できたかどうか
+// ブローバルで管理したいデータを持つコンテキストを返す
 export const useAppContext = () => {
   const context = useContext(AppContext); // コンテキストをここで取得
 

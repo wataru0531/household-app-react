@@ -42,12 +42,12 @@ interface TransactionFormProps {
   isEntryDrawerOpen: boolean
   onCloseForm: () => void
   currentDay: string
-  onSaveTransaction: (_transaction: Schema) => Promise<void>
-  onDeleteTransaction: (_transactionsId: string | readonly string[]) => Promise<void>
+  // onSaveTransaction: (_transaction: Schema) => Promise<void>
+  // onDeleteTransaction: (_transactionsId: string | readonly string[]) => Promise<void>
   selectedTransaction: Transaction | null
   setSelectedTransaction: React.Dispatch<React.SetStateAction<Transaction | null>>
-  onUpdateTransaction: (transaction: Schema, _transactionId: string) => Promise<void>
-  isMobile: boolean
+  // onUpdateTransaction: (transaction: Schema, _transactionId: string) => Promise<void>
+  // isMobile: boolean
   isDialogOpen: boolean
   setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -63,20 +63,17 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
   isEntryDrawerOpen,
   onCloseForm,
   currentDay,
-  onSaveTransaction,
-  onDeleteTransaction, // 削除
+  // onSaveTransaction,
+  // onDeleteTransaction, // 削除
   selectedTransaction,
   setSelectedTransaction,
-  onUpdateTransaction,
-  isMobile,
+  // onUpdateTransaction,
+  // isMobile,
   isDialogOpen,
   setIsDialogOpen,
 }) => {
-  // 
-  // const context = useContext(AppContext);
-  // console.log(context);
 
-  const context = useAppContext();
+  const { onSaveTransaction, onDeleteTransaction, onUpdateTransaction, isMobile } = useAppContext();
   // console.log(context);
 
 

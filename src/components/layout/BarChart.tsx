@@ -13,9 +13,10 @@ import {
 } from 'chart.js';
 
 import { Bar } from 'react-chartjs-2';
-import { Transaction } from '../../types';
 import { calculateDailyBalances } from '../../utils/financeCalculations';
 import { Box, CircularProgress, Typography, useTheme } from '@mui/material';
+import { useAppContext } from '../../context/AppContext';
+import useMonthlyTransactions from '../../hooks/useMonthlyTransactions';
 // → Reactのコンポーネント形式でChart.jsを簡単に使えるようにしたもの。
 //   Chart.jsの設定やデータ構造をそのまま使用可能
 
@@ -29,14 +30,19 @@ ChartJS.register(
   Legend
 );
 
-interface BarChartProps {
-  monthlyTransactions: Transaction[]
-  isLoading: boolean
-}
+// interface BarChartProps {
+//   monthlyTransactions: Transaction[]
+//   isLoading: boolean
+// }
 
-const BarChart: React.FC<BarChartProps> = ({ monthlyTransactions, isLoading }) => {
+// const BarChart: React.FC<BarChartProps> = ({ monthlyTransactions, isLoading }) => {
+const BarChart = () => {
   // console.log(monthlyTransactions); 
   // → (2) [{id: 'Bx9mXMFLNws9Y5FGf3qV', amount: 1000, type: 'expense', date: '2025-01-01', content: '鯖', …}, {…}]
+
+  const { isLoading } = useAppContext();
+  const  monthlyTransactions  = useMonthlyTransactions();
+  // console.log(monthlyTransactiions)
 
   // useTheme → デフォルトのthemeに加えて、自作で定義したテーマも反映された完全なテーマオブジェクトを取得可能
   const theme = useTheme();

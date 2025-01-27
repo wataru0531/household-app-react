@@ -13,15 +13,21 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { Transaction } from "../../types";
 import { financeCalculations } from "../../utils/financeCalculations";
 import { formatCurrency } from "../../utils/formatting";
+import useMonthlyTransactions from "../../hooks/useMonthlyTransactions";
 
 // 今月のデータ
-interface MonthlySummaryProps {
-  monthlyTransactions: Transaction[]
-}
+// interface MonthlySummaryProps {
+//   monthlyTransactions: Transaction[]
+// }
 
 
-const MonthlySummary: React.FC<MonthlySummaryProps> = ({ monthlyTransactions }) => {
+// const MonthlySummary: React.FC<MonthlySummaryProps> = ({ monthlyTransactions }) => {
+const MonthlySummary = () => {
   // console.log(monthlyTransactions); // (2) [{id: '6rblq1UPv564Xd32jdlB', type: 'income', date: '2024-12-09', content: '銀行振込', amount: '2000', …}, {…}]
+
+  const monthlyTransactions = useMonthlyTransactions();
+  console.log(monthlyTransactions);
+
 
   // その月のデータから、収入、支出、残高を算出
   const { income, expense, balance } = financeCalculations(monthlyTransactions);

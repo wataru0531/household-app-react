@@ -8,18 +8,24 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, ChartData } from 'chart.
 import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material';
 import { ExpenseCategoryType, IncomeCategoryType, Transaction, TransactionType } from '../../types';
 import { useTheme } from '@mui/material';
+import { useAppContext } from '../../context/AppContext';
+import useMonthlyTransactions from '../../hooks/useMonthlyTransactions';
 
 // ChartJS → ライブラリのコア部分で、チャートの作成や動作を支える本体のようなもの
 //           チャートに必要なプラグインや要素を登録している
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-interface CategoryChartProps {
-  monthlyTransactions: Transaction[]
-  isLoading: boolean
-}
+// interface CategoryChartProps {
+//   monthlyTransactions: Transaction[]
+//   isLoading: boolean
+// }
 
-const CategoryChart: React.FC<CategoryChartProps> = ({ monthlyTransactions, isLoading }) => {
+// const CategoryChart: React.FC<CategoryChartProps> = ({ monthlyTransactions, isLoading }) => {
+const CategoryChart = () => {
   // console.log(monthlyTransactions); // (4) [{id: 'Bx9mXMFLNws9Y5FGf3qV', content: '鯖', date: '2025-01-01', category: '食費', type: 'expense', …}, {…}, {…}, {…}]
+
+  const monthlyTransactions = useMonthlyTransactions();
+  const { isLoading } = useAppContext();
 
   const theme = useTheme();
 

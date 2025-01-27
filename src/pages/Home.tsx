@@ -1,6 +1,6 @@
 
 // Home
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { format } from "date-fns";
 
@@ -11,37 +11,42 @@ import TransactionForm from "../components/layout/TransactionForm";
 import { Transaction } from "../types";
 import { Schema } from "../validations/schema";
 import { DateClickArg } from "@fullcalendar/interaction";
-import { AppContext } from "../context/AppContext";
+import { AppContext, useAppContext } from "../context/AppContext";
+import useMonthlyTransactions from "../hooks/useMonthlyTransactions";
 
-interface HomeProps {
-  monthlyTransactions: Transaction[] // オブジェクトの配列
-  setCurrentMonth: React.Dispatch<React.SetStateAction<Date>> // useStateの更新関数の型
-  onSaveTransaction: (_transaction: Schema) => Promise<void>
-  onDeleteTransaction: (_transactionsId: string | readonly string[]) => Promise<void>
-  onUpdateTransaction: (_transaction: Schema, _transactionsId: string) => Promise<void>
-}
+// interface HomeProps {
+//   monthlyTransactions: Transaction[] // オブジェクトの配列
+//   setCurrentMonth: React.Dispatch<React.SetStateAction<Date>> // useStateの更新関数の型
+//   onSaveTransaction: (_transaction: Schema) => Promise<void>
+//   onDeleteTransaction: (_transactionsId: string | readonly string[]) => Promise<void>
+//   onUpdateTransaction: (_transaction: Schema, _transactionsId: string) => Promise<void>
+// }
 
-const Home: React.FC<HomeProps> = ({ 
-  monthlyTransactions, 
-  setCurrentMonth,
-  onSaveTransaction,
-  onDeleteTransaction,
-  onUpdateTransaction,
-}) => {
+// const Home: React.FC<HomeProps> = (
+const Home = (
+//   { 
+//   monthlyTransactions, 
+//   setCurrentMonth,
+//   onSaveTransaction,
+//   onDeleteTransaction,
+//   onUpdateTransaction,
+// }
+) => {
   // console.log(monthlyTransactions); // その月の取引履歴のみ
 
   // グローバルな値を取得
-  const context = useContext(AppContext);
+  const { isMobile } = useAppContext();
   // console.log(context); // {transactions: Array(0), setTransactions: ƒ}
   // console.log(context?.transactions);
 
+  const monthlyTransactions = useMonthlyTransactions();
 
 
   // レスポンシブ
   // sm: 600px md: 900px, lg: 1200px
   // ここでは、1200pxを下回ればtrueを返す
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+  // const theme = useTheme();
+  // const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
   // console.log(isMobile);
 
   const today = format(new Date(), "yyyy-MM-dd"); // 今日の日付
@@ -60,11 +65,15 @@ const Home: React.FC<HomeProps> = ({
   const [ isDialogOpen, setIsDialogOpen ] = useState(false);
 
   // 選択されて日の取引データを取得(配列)
-  const dailyTransactions = monthlyTransactions.filter(transaction => {
-    // console.log(transaction); // {id: '25ZjJ0OxeuZM4G2jlfL0', type: 'expense', content: '更新料', date: '2024-12-07', amount: 7000, …}
-    return transaction.date === currentDay;
-  });
-  // console.log(dailyTransactions);
+  const dailyTransactions = useMemo(() => {
+    return monthlyTransactions.filter(transaction => (
+      // console.log(transaction); // {id: '25ZjJ0OxeuZM4G2jlfL0', type: 'expense', content: '更新料', date: '2024-12-07', amount: 7000, …}
+      transaction.date === currentDay
+    ))
+    // console.log(dailyTransactions);
+
+    // 月間の取引データ、currentDayが更新された時にだけレンダリング
+  }, [ monthlyTransactions, currentDay ]);
 
   // フォームを閉じる処理
   // → クリックした取引をクリア　+ Dialogの開閉処理
@@ -131,10 +140,12 @@ const Home: React.FC<HomeProps> = ({
     <Box sx={{ display: "flex" }}>
       {/* 左コンテンツ */}
       <Box sx={{ flexGrow: 1 }}>
-        <MonthlySummary monthlyTransactions={ monthlyTransactions } />
+        <MonthlySummary 
+          // monthlyTransactions={ monthlyTransactions } 
+        />
         <Calendar 
-          monthlyTransactions={ monthlyTransactions } 
-          setCurrentMonth={ setCurrentMonth } 
+          // monthlyTransactions={ monthlyTransactions } 
+          // setCurrentMonth={ setCurrentMonth } 
           currentDay={ currentDay }
           setCurrentDay={ setCurrentDay }
           today={ today }
@@ -150,7 +161,7 @@ const Home: React.FC<HomeProps> = ({
           dailyTransactions={ dailyTransactions }  
           onHandleAddTransactionForm={ onHandleAddTransactionForm }
           onSelectTransaction={ onSelectTransaction }
-          isMobile= { isMobile }
+          // isMobile= { isMobile }
           isMobileDrawerOpen={ isMobileDrawerOpen }
           handleCloseMobileDrawer={ handleCloseMobileDrawer }
         />
@@ -160,12 +171,12 @@ const Home: React.FC<HomeProps> = ({
           isEntryDrawerOpen={ isEntryDrawerOpen }
           onCloseForm={ onCloseForm } 
           currentDay={ currentDay }
-          onSaveTransaction={ onSaveTransaction }  
-          onDeleteTransaction={ onDeleteTransaction }
+          // onSaveTransaction={ onSaveTransaction }  
+          // onDeleteTransaction={ onDeleteTransaction }
           selectedTransaction={ selectedTransaction }
           setSelectedTransaction={ setSelectedTransaction }
-          onUpdateTransaction={ onUpdateTransaction } 
-          isMobile={ isMobile }
+          // onUpdateTransaction={ onUpdateTransaction } 
+          // isMobile={ isMobile }
           isDialogOpen={ isDialogOpen }
           setIsDialogOpen={ setIsDialogOpen }
         />

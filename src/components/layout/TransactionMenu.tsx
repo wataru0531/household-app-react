@@ -24,13 +24,14 @@ import DailySummary from "./DailySummary";
 import { Transaction } from "../../types";
 import { formatCurrency } from "../../utils/formatting";
 import { IconComponents } from "../common/IconComponents";
+import { useAppContext } from "../../context/AppContext";
 
 interface TransactionMenuProps {
   currentDay: string // 2024-12-07
   dailyTransactions: Transaction[]
   onHandleAddTransactionForm: () => void
   onSelectTransaction: (_transaction: Transaction) => void
-  isMobile: boolean
+  // isMobile: boolean
   isMobileDrawerOpen: boolean
   handleCloseMobileDrawer: () => void
 }
@@ -41,12 +42,14 @@ const TransactionMenu: React.FC<TransactionMenuProps> = ({
   dailyTransactions,
   onHandleAddTransactionForm,
   onSelectTransaction,
-  isMobile,
+  // isMobile,
   isMobileDrawerOpen,
   handleCloseMobileDrawer,
 }) => {
   // console.log(currentDay); // 今日の日付 2024-12-13
   // console.log(dailyTransactions); // 初めは空配列
+
+  const { isMobile } = useAppContext();
 
   const menuDrawerWidth = 320;
 
